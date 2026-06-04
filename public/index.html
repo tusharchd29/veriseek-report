@@ -787,8 +787,8 @@ ${d.waitlist.hasData ? `
   </div>
   <div class="sc" style="border-color:${d.waitlist.formSubmissions>0?'#BBF7D0':'#FECACA'}">
     <div class="sl">Form Submissions</div>
-    <div class="sv" style="color:${d.waitlist.formSubmissions>0?'#15803D':'#B91C1C'}">${d.waitlist.formSubmissions>0?fmtN(d.waitlist.formSubmissions):'Not tracked'}</div>
-    <div class="ss">${d.waitlist.formSubmissions>0?'Subscribe event tracked':'Set up pixel Subscribe/Lead event'}</div>
+    <div class="sv" style="color:${d.waitlist.formSubmissions>0?'#15803D':'#B45309'}">${d.waitlist.formSubmissions>0?fmtN(d.waitlist.formSubmissions):'0'}</div>
+    <div class="ss">${d.waitlist.formSubmissions>0?'Subscribe event tracked':'No conversions from ad traffic'}</div>
   </div>
 </div>
 
@@ -809,8 +809,8 @@ ${d.waitlist.clicks>0&&d.waitlist.lpv>0 ? `
       ${d.waitlist.formSubmissions>0
         ? `<div style="font-family:'DM Serif Display',serif;font-size:22px;color:#15803D">${fmtN(d.waitlist.formSubmissions)}</div>
            <div style="font-size:11px;color:#6B6560;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Form Submissions</div>`
-        : `<div style="font-family:'DM Serif Display',serif;font-size:22px;color:#B91C1C">?</div>
-           <div style="font-size:11px;color:#B91C1C;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Not Tracked</div>`
+        : `<div style="font-family:'DM Serif Display',serif;font-size:22px;color:#B45309">0</div>
+           <div style="font-size:11px;color:#B45309;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">No Conversions</div>`
       }
     </div>
     ${d.waitlist.clicks>0&&d.waitlist.lpv>0 ? `
@@ -823,11 +823,11 @@ ${d.waitlist.clicks>0&&d.waitlist.lpv>0 ? `
 </div>` : ''}
 
 ${!d.waitlist.pixelTracked ? `
-<div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start">
-  <div style="font-size:18px;flex-shrink:0">⚙️</div>
+<div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start">
+  <div style="font-size:18px;flex-shrink:0">📊</div>
   <div>
-    <div style="font-size:12px;font-weight:700;color:#B91C1C;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Form Submissions Not Showing in This Period</div>
-    <div style="font-size:12.5px;color:#7F1D1D;line-height:1.6">Lead and Subscribe events are set up on the pixel but no form submissions were recorded in this date range. Try selecting a wider date range — 11 Lead events have been recorded historically on this pixel.</div>
+    <div style="font-size:12px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">0 Form Submissions Attributed to This Ad</div>
+    <div style="font-size:12.5px;color:#78350F;line-height:1.6">Meta's pixel confirms <strong>zero form submissions</strong> from visitors who came via this ad campaign. The pixel is correctly installed and Lead events are firing from organic traffic — but none of the ad-driven visitors (${fmtN(d.waitlist.clicks)} clicks, ${fmtN(d.waitlist.lpv)} page views) completed the waitlist form. This is a <strong>landing page conversion issue</strong>, not a tracking issue.</div>
   </div>
 </div>` : ''}
 
