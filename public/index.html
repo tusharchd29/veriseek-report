@@ -429,20 +429,15 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    // LPV and Subscribe — both come through actions array with action_breakdowns
-    const lpv = getAction(c.actions, [
-      'landing_page_view',
-      'offsite_conversion.fb_pixel_landing_page_view',
-      'website_landing_page_views',
-    ]);
+    // LPV — confirmed action_type from API response
+    const lpv = getAction(c.actions, ['landing_page_view']);
 
-    // Form submissions — Subscribe button clicks tracked via Event Setup Tool
+    // Form submissions — Subscribe (once Event Setup Tool is saved) or lead events
     const formSubmissions = getAction(c.actions, [
       'subscribe',
+      'lead',
       'offsite_conversion.fb_pixel_lead',
       'offsite_conversion.fb_pixel_complete_registration',
-      'lead',
-      'contact',
     ]);
 
     return {
@@ -579,7 +574,6 @@ async function generateReport() {
     // Step 2
     const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
       fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions'].join(','),
-      action_breakdowns:'action_type',
       level:'campaign',
       time_range:JSON.stringify({since,until}),
       sort:'impressions_descending',
@@ -588,13 +582,6 @@ async function generateReport() {
     stepDone('ls2'); stepActive('ls3');
 
     const raw = insightsData.data||[];
-    // Log action types for debugging — remove after fix confirmed
-    raw.forEach(c => {
-      if ((c.campaign_name||'').toLowerCase().includes('waitlist') || c.objective === 'LINK_CLICKS') {
-        console.log('WAITLIST ACTIONS:', JSON.stringify(c.actions));
-        console.log('WAITLIST FULL:', JSON.stringify(c));
-      }
-    });
     if (!raw.length) throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
 
     const d     = processInsights(raw);
