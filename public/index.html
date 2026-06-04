@@ -429,10 +429,12 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    // all_conversion_types lives inside results.all_conversion_types
-    // e.g. "34 (Website landing page views)", "5 (Subscribe)"
-    const allTypes = (c.results && Array.isArray(c.results.all_conversion_types))
-                     ? c.results.all_conversion_types : [];
+    // all_conversion_types — Meta puts this in different places depending on API version
+    // Check results.all_conversion_types first, then top-level, then fall back to actions
+    const allTypes =
+      (c.results && Array.isArray(c.results.all_conversion_types) ? c.results.all_conversion_types : null) ||
+      (Array.isArray(c.all_conversion_types) ? c.all_conversion_types : null) ||
+      [];
 
     function extractFromAllTypes(keyword) {
       for (const s of allTypes) {
@@ -444,16 +446,16 @@ function processInsights(raw) {
       return 0;
     }
 
-    // LPV — from all_conversion_types
-    const lpv = extractFromAllTypes('landing page view');
+    // LPV — try all_conversion_types first, then actions array
+    const lpv = extractFromAllTypes('landing page view')
+      || getAction(c.actions, ['landing_page_view','offsite_conversion.fb_pixel_landing_page_view']);
 
-    // Form submissions — Subscribe event from all_conversion_types
+    // Form submissions — try Subscribe from all_conversion_types, then actions array
     const formSubmissions = extractFromAllTypes('subscribe')
       || getAction(c.actions, [
            'offsite_conversion.fb_pixel_lead',
            'offsite_conversion.fb_pixel_complete_registration',
-           'lead',
-           'subscribe',
+           'lead', 'subscribe',
          ]);
 
     return {
@@ -598,7 +600,6 @@ async function generateReport() {
     stepDone('ls2'); stepActive('ls3');
 
     const raw = insightsData.data||[];
-    if (raw.length > 0) console.log('RAW SAMPLE:', JSON.stringify(raw[0], null, 2));
     if (!raw.length) throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
 
     const d     = processInsights(raw);
