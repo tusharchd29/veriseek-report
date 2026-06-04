@@ -598,6 +598,7 @@ async function generateReport() {
     stepDone('ls2'); stepActive('ls3');
 
     const raw = insightsData.data||[];
+    if (raw.length > 0) console.log('RAW SAMPLE:', JSON.stringify(raw[0], null, 2));
     if (!raw.length) throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
 
     const d     = processInsights(raw);
