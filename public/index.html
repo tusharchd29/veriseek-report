@@ -435,11 +435,13 @@ function processInsights(raw) {
       'offsite_conversion.fb_pixel_landing_page_view',
     ]);
 
-    // Form submissions — pixel lead / registration events
+    // Form submissions — pixel lead / registration / subscribe events
     const formSubmissions = getAction(c.actions, [
       'offsite_conversion.fb_pixel_lead',
       'offsite_conversion.fb_pixel_complete_registration',
       'lead',
+      'subscribe',
+      'offsite_conversion.fb_pixel_subscribe',
     ]);
 
     return {
@@ -469,6 +471,7 @@ function processInsights(raw) {
     lpv:             waitlistCamps.reduce((s,c)=>s+c.lpv, 0),
     formSubmissions: waitlistCamps.reduce((s,c)=>s+c.formSubmissions, 0),
     pixelTracked:    waitlistCamps.some(c=>c.formSubmissions>0),
+    eventType:       waitlistCamps.some(c=>c.formSubmissions>0) ? 'Subscribe' : null,
   };
 
   return {
@@ -788,7 +791,7 @@ ${d.waitlist.hasData ? `
   <div class="sc" style="border-color:${d.waitlist.formSubmissions>0?'#BBF7D0':'#FECACA'}">
     <div class="sl">Form Submissions</div>
     <div class="sv" style="color:${d.waitlist.formSubmissions>0?'#15803D':'#B91C1C'}">${d.waitlist.formSubmissions>0?fmtN(d.waitlist.formSubmissions):'Not tracked'}</div>
-    <div class="ss">${d.waitlist.formSubmissions>0?'Pixel lead event tracked':'Set up pixel Lead event'}</div>
+    <div class="ss">${d.waitlist.formSubmissions>0?'Subscribe event tracked':'Set up pixel Subscribe/Lead event'}</div>
   </div>
 </div>
 
