@@ -429,18 +429,55 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    return { name:c.campaign_name||c.campaign_id, objective:c.objective||'', impressions, reach, clicks, freq, ctr, thruPlays, leads, purchases, convos, engagements, resultVal, resultType };
+    // LPV — extract from all_conversion_types string array
+    // Meta returns e.g. "34 (Website landing page views)" inside results.all_conversion_types
+    const allTypes = c.results?.all_conversion_types || [];
+    let lpv = 0;
+    for (const s of allTypes) {
+      if (s.toLowerCase().includes('landing page view')) {
+        const m = s.match(/^([\d,]+)/);
+        if (m) { lpv = parseInt(m[1].replace(/,/g,''))||0; break; }
+      }
+    }
+
+    // Form submissions — pixel lead / registration events
+    const formSubmissions = getAction(c.actions, [
+      'offsite_conversion.fb_pixel_lead',
+      'offsite_conversion.fb_pixel_complete_registration',
+      'lead',
+    ]);
+
+    return {
+      name: c.campaign_name||c.campaign_id,
+      objective: c.objective||'',
+      impressions, reach, clicks, freq, ctr,
+      thruPlays, leads, purchases, convos, engagements,
+      lpv, formSubmissions,
+      resultVal, resultType,
+      isWaitlist: (c.campaign_name||'').toLowerCase().includes('waitlist') ||
+                  c.objective === 'LINK_CLICKS',
+    };
   });
 
   let acctType='Results', acctTotal=0;
-  if      (totalLeads>0)       { acctType='Leads';       acctTotal=totalLeads; }
-  else if (totalPurchases>0)   { acctType='Purchases';   acctTotal=totalPurchases; }
+  if      (totalLeads>0)       { acctType='Leads';         acctTotal=totalLeads; }
+  else if (totalPurchases>0)   { acctType='Purchases';     acctTotal=totalPurchases; }
   else if (totalConvos>0)      { acctType='Conversations'; acctTotal=totalConvos; }
-  else if (totalThruPlays>0)   { acctType='ThruPlays';   acctTotal=totalThruPlays; }
-  else if (totalEngagements>0) { acctType='Engagements'; acctTotal=totalEngagements; }
+  else if (totalThruPlays>0)   { acctType='ThruPlays';     acctTotal=totalThruPlays; }
+  else if (totalEngagements>0) { acctType='Engagements';   acctTotal=totalEngagements; }
+
+  // Aggregate waitlist funnel
+  const waitlistCamps = camps.filter(c=>c.isWaitlist);
+  const waitlist = {
+    hasData:         waitlistCamps.length > 0,
+    clicks:          waitlistCamps.reduce((s,c)=>s+c.clicks, 0),
+    lpv:             waitlistCamps.reduce((s,c)=>s+c.lpv, 0),
+    formSubmissions: waitlistCamps.reduce((s,c)=>s+c.formSubmissions, 0),
+    pixelTracked:    waitlistCamps.some(c=>c.formSubmissions>0),
+  };
 
   return {
-    camps, acctType, acctTotal,
+    camps, acctType, acctTotal, waitlist,
     totalImpressions, totalReach, totalClicks,
     totalLeads, totalPurchases, totalConvos, totalThruPlays, totalEngagements,
     avgFreq: camps.length ? (camps.reduce((s,c)=>s+c.freq,0)/camps.length).toFixed(2) : '—',
@@ -542,7 +579,7 @@ async function generateReport() {
 
     // Step 2
     const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
-      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions'].join(','),
+      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions','result_values'].join(','),
       level:'campaign',
       time_range:JSON.stringify({since,until}),
       sort:'impressions_descending',
@@ -739,7 +776,71 @@ ${d.camps.map(c=>{
 </tbody></table>
 </div><hr class="divr"/>
 
-<!-- 3. FUNNEL -->
+<!-- 3. WAITLIST CAMPAIGN FUNNEL -->
+${d.waitlist.hasData ? `
+<div class="sec">
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Waitlist Campaign — Click to Form Funnel</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+  <div class="sc">
+    <div class="sl">Ad Clicks</div>
+    <div class="sv">${fmtN(d.waitlist.clicks)}</div>
+    <div class="ss">Clicked the ad</div>
+  </div>
+  <div class="sc" style="border-color:${d.waitlist.lpv>0?'#AFA9EC':'#E2DDD5'}">
+    <div class="sl">Landed on Page</div>
+    <div class="sv" style="color:${d.waitlist.lpv>0?'#4C3FA0':'#9E9890'}">${d.waitlist.lpv>0?fmtN(d.waitlist.lpv):'—'}</div>
+    <div class="ss">${d.waitlist.clicks>0&&d.waitlist.lpv>0?Math.round(d.waitlist.lpv/d.waitlist.clicks*100)+'% of clicks reached page':'Pixel tracking required'}</div>
+  </div>
+  <div class="sc" style="border-color:${d.waitlist.formSubmissions>0?'#BBF7D0':'#FECACA'}">
+    <div class="sl">Form Submissions</div>
+    <div class="sv" style="color:${d.waitlist.formSubmissions>0?'#15803D':'#B91C1C'}">${d.waitlist.formSubmissions>0?fmtN(d.waitlist.formSubmissions):'Not tracked'}</div>
+    <div class="ss">${d.waitlist.formSubmissions>0?'Pixel lead event tracked':'Set up pixel Lead event'}</div>
+  </div>
+</div>
+
+${d.waitlist.clicks>0&&d.waitlist.lpv>0 ? `
+<div style="background:#F0EDE6;border-radius:10px;padding:16px 20px;margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap">
+    <div style="text-align:center">
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1714">${fmtN(d.waitlist.clicks)}</div>
+      <div style="font-size:11px;color:#6B6560;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Clicks</div>
+    </div>
+    <div style="font-size:20px;color:#E2DDD5;font-weight:300">→</div>
+    <div style="text-align:center">
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#4C3FA0">${fmtN(d.waitlist.lpv)}</div>
+      <div style="font-size:11px;color:#6B6560;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Landed on Page</div>
+    </div>
+    <div style="font-size:20px;color:#E2DDD5;font-weight:300">→</div>
+    <div style="text-align:center">
+      ${d.waitlist.formSubmissions>0
+        ? `<div style="font-family:'DM Serif Display',serif;font-size:22px;color:#15803D">${fmtN(d.waitlist.formSubmissions)}</div>
+           <div style="font-size:11px;color:#6B6560;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Form Submissions</div>`
+        : `<div style="font-family:'DM Serif Display',serif;font-size:22px;color:#B91C1C">?</div>
+           <div style="font-size:11px;color:#B91C1C;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Not Tracked</div>`
+      }
+    </div>
+    ${d.waitlist.clicks>0&&d.waitlist.lpv>0 ? `
+    <div style="margin-left:auto;text-align:right">
+      <div style="font-size:11px;color:#6B6560;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Click → Page Rate</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1714">${Math.round(d.waitlist.lpv/d.waitlist.clicks*100)}%</div>
+      ${d.waitlist.lpv/d.waitlist.clicks<0.5?'<div style="font-size:11px;color:#B45309;margin-top:2px">⚠ High drop-off — check page speed</div>':'<div style="font-size:11px;color:#15803D;margin-top:2px">✓ Good landing rate</div>'}
+    </div>` : ''}
+  </div>
+</div>` : ''}
+
+${!d.waitlist.pixelTracked ? `
+<div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start">
+  <div style="font-size:18px;flex-shrink:0">⚙️</div>
+  <div>
+    <div style="font-size:12px;font-weight:700;color:#B91C1C;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Form Submissions Not Being Tracked</div>
+    <div style="font-size:12.5px;color:#7F1D1D;line-height:1.6">Meta's pixel is not firing a <strong>Lead</strong> or <strong>CompleteRegistration</strong> event when someone submits the waitlist form. This means we cannot report how many people actually signed up. To fix: add <code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;font-size:11px">fbq('track', 'Lead')</code> to your form's success page or confirmation step.</div>
+  </div>
+</div>` : ''}
+
+</div><hr class="divr"/>` : ''}
+
+<!-- FULL AUDIENCE FUNNEL -->
 ${d.totalReach>0?`
 <div class="sec">
 <div class="sh"><div class="sn">${ns()}</div><div class="st">Full Funnel — Reach to Results</div></div>
