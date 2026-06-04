@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veriseek — Meta Ads Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple:    #4C3FA0;
+  --purple-lt: #EAE8F7;
+  --purple-bd: #C4B5FD;
+  --teal:      #0F7B6C;
+  --teal-lt:   #E0F5F1;
+  --amber:     #B45309;
+  --amber-lt:  #FEF3C7;
+  --red:       #B91C1C;
+  --red-lt:    #FEE2E2;
+  --green:     #15803D;
+  --green-lt:  #DCFCE7;
+  --gold:      #C9A84C;
+  --bg:        #F7F5F0;
+  --surface:   #FFFFFF;
+  --surface2:  #F0EDE6;
+  --border:    #E2DDD5;
+  --text:      #1A1714;
+  --muted:     #6B6560;
+  --hint:      #9E9890;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── APP SHELL ── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
+.brand-name span { color: var(--gold); font-style: italic; }
+.brand-divider { width: 1px; height: 20px; background: var(--border); }
+.brand-sub { font-size: 12px; color: var(--muted); font-weight: 500; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.status-pill {
+  font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+  background: var(--purple-lt); color: var(--purple); border: 1px solid var(--purple-bd);
+}
+
+/* ── CONTROLS BAR ── */
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.date-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-right: 4px; }
+.date-btn {
+  font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif;
+}
+.date-btn:hover { border-color: var(--purple); color: var(--purple); }
+.date-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+.ctrl-divider { width: 1px; height: 24px; background: var(--border); margin: 0 6px; }
+.gen-btn {
+  margin-left: auto;
+  padding: 8px 22px; border-radius: 8px; background: var(--purple);
+  border: none; color: #fff; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s;
+  display: flex; align-items: center; gap: 8px;
+}
+.gen-btn:hover { background: #3730a3; box-shadow: 0 4px 14px rgba(76,63,160,.3); }
+.gen-btn:disabled { background: var(--hint); cursor: not-allowed; box-shadow: none; }
+.gen-btn .spin {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none;
+}
+.gen-btn.loading .spin { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CONTENT AREA ── */
+.content { flex: 1; padding: 36px 32px 60px; max-width: 980px; margin: 0 auto; width: 100%; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 20px; color: var(--hint); text-align: center; gap: 14px;
+}
+.empty-icon { font-size: 52px; opacity: .5; }
+.empty h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--muted); }
+.empty p { font-size: 13.5px; line-height: 1.7; max-width: 340px; }
+
+/* ── LOADING ── */
+.loading-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 80px 20px; gap: 12px;
+}
+.loading-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--muted); }
+.loading-steps { display: flex; flex-direction: column; gap: 6px; width: 260px; margin-top: 8px; }
+.lstep {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-radius: 8px; background: var(--surface); border: 1px solid var(--border);
+  font-size: 12px; color: var(--hint); transition: all .25s;
+}
+.lstep.active { border-color: var(--purple-bd); background: var(--purple-lt); color: var(--purple); }
+.lstep.done { color: var(--hint); }
+.lstep-ico {
+  width: 18px; height: 18px; border-radius: 50%; background: var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0;
+}
+.lstep.active .lstep-ico { background: var(--purple); color: #fff; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── REPORT ACTIONS BAR ── */
+.report-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 24px;
+}
+.ra-info { font-size: 13px; color: var(--muted); }
+.ra-info b { color: var(--text); }
+.ra-btns { display: flex; gap: 8px; }
+.ra-btn {
+  font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 8px;
+  cursor: pointer; transition: all .12s; border: 1.5px solid; font-family: 'DM Sans', sans-serif;
+}
+.ra-btn.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+.ra-btn.primary:hover { background: #3730a3; }
+.ra-btn.sec { background: transparent; border-color: var(--border); color: var(--muted); }
+.ra-btn.sec:hover { border-color: var(--purple); color: var(--purple); }
+
+/* ── ERROR ── */
+.err-box {
+  background: var(--red-lt); border: 1.5px solid #FECACA;
+  border-radius: 10px; padding: 16px 20px;
+}
+.err-box h4 { font-size: 13px; font-weight: 700; color: var(--red); margin-bottom: 6px; }
+.err-box p { font-size: 12.5px; color: #7f1d1d; line-height: 1.6; }
+.err-box code { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 3px; }
+
+/* ── REPORT STYLES (injected into report container) ── */
+.report-wrap { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+
+/* inline report CSS is in the buildReport() function */
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-name">Veriseek <span>AI</span></div>
+      <div class="brand-divider"></div>
+      <div class="brand-sub">Meta Ads Performance Report</div>
+    </div>
+    <div class="header-right">
+      <span class="status-pill" id="statusPill">● Ready</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <span class="date-label">Period</span>
+    <button class="date-btn" data-preset="last_7d">Last 7 Days</button>
+    <button class="date-btn active" data-preset="last_30d">Last 30 Days</button>
+    <button class="date-btn" data-preset="this_month">This Month</button>
+    <button class="date-btn" data-preset="last_month">Last Month</button>
+    <div class="ctrl-divider"></div>
+    <button class="gen-btn" id="genBtn" onclick="generateReport()">
+      <div class="spin"></div>
+      <span id="genTxt">Generate Report</span>
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="content">
+    <div class="empty">
+      <div class="empty-icon">📊</div>
+      <h2>Ready to generate</h2>
+      <p>Select a date range above and click <strong>Generate Report</strong> to pull live data from Meta Ads and build a client-ready report.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────
+const ACCOUNT_ID = '3252000788333236';
+const CLIENT_NAME = 'Veriseek AI';
+const CURRENCY = 'INR';
+const CUR_SYMBOL = '₹';
+
+// ── STATE ──────────────────────────────────────────────────────────
+let selectedPreset = 'last_30d';
+
+// ── DATE PRESETS ───────────────────────────────────────────────────
+const PRESETS = {
+  last_7d:    { label: 'Last 7 Days',   since: () => daysAgo(7),       until: () => today() },
+  last_30d:   { label: 'Last 30 Days',  since: () => daysAgo(30),      until: () => today() },
+  this_month: { label: 'This Month',    since: () => firstOfMonth(),   until: () => today() },
+  last_month: { label: 'Last Month',    since: () => firstOfLastMonth(), until: () => lastOfLastMonth() },
+};
+function today() { return new Date().toISOString().split('T')[0]; }
+function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().split('T')[0]; }
+function firstOfMonth() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; }
+function firstOfLastMonth() { const d = new Date(new Date().getFullYear(), new Date().getMonth()-1, 1); return d.toISOString().split('T')[0]; }
+function lastOfLastMonth() { const d = new Date(new Date().getFullYear(), new Date().getMonth(), 0); return d.toISOString().split('T')[0]; }
+
+// ── DATE BUTTONS ───────────────────────────────────────────────────
+document.querySelectorAll('.date-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    selectedPreset = this.dataset.preset;
+  });
+});
+
+// ── API CALL (goes through /api/meta proxy) ────────────────────────
+async function metaAPI(endpoint, params = {}) {
+  const url = new URL('/api/meta', window.location.origin);
+  url.searchParams.set('endpoint', endpoint);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v));
+  const res = await fetch(url.toString());
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// ── STEP HELPERS ───────────────────────────────────────────────────
+function stepDone(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active'); el.classList.add('done');
+  el.querySelector('.lstep-ico').textContent = '✓';
+}
+function stepActive(id) { document.getElementById(id)?.classList.add('active'); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── NUMBER FORMAT ──────────────────────────────────────────────────
+function fmtN(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (n >= 10000000) return (n/10000000).toFixed(2) + 'Cr';
+  if (n >= 100000)   return (n/100000).toFixed(1)   + 'L';
+  if (n >= 1000)     return (n/1000).toFixed(1)      + 'K';
+  if (n < 10)        return parseFloat(n.toFixed(2)).toString();
+  return Math.round(n).toLocaleString('en-IN');
+}
+function fmtC(n) { return n ? `${CUR_SYMBOL}${fmtN(n)}` : '—'; }
+
+// ── EXTRACT ACTION VALUE FROM META RESPONSE ────────────────────────
+function getAction(actions, types) {
+  if (!actions) return 0;
+  for (const t of (Array.isArray(types) ? types : [types])) {
+    const a = actions.find(x => x.action_type === t);
+    if (a) return parseInt(a.value) || 0;
+  }
+  return 0;
+}
+
+// ── PROCESS RAW INSIGHTS ───────────────────────────────────────────
+function processInsights(raw) {
+  let totalSpend = 0, totalImpressions = 0, totalReach = 0, totalClicks = 0;
+  let totalLeads = 0, totalPurchases = 0, totalConvos = 0, totalThruPlays = 0;
+  let totalEngagements = 0, totalLPV = 0;
+
+  const camps = raw.map(c => {
+    const spend       = parseFloat(c.spend || 0);
+    const impressions = parseInt(c.impressions || 0);
+    const reach       = parseInt(c.reach || 0);
+    const clicks      = parseInt(c.clicks || 0);
+    const freq        = parseFloat(c.frequency || 0);
+    const ctr         = parseFloat(c.ctr || 0);
+    const lpv         = parseInt(c.landing_page_views || 0);
+    const thruPlays   = c.video_thruplay_watched_actions
+                          ? parseInt(c.video_thruplay_watched_actions[0]?.value || 0) : 0;
+
+    const leads       = getAction(c.actions, ['lead','leadgen_grouped','offsite_conversion.fb_pixel_lead','onsite_conversion.lead_grouped']);
+    const purchases   = getAction(c.actions, ['purchase','offsite_conversion.fb_pixel_purchase']);
+    const convos      = getAction(c.actions, ['onsite_conversion.messaging_conversation_started_7d']);
+    const engagements = getAction(c.actions, ['post_engagement','page_engagement']);
+
+    // Primary result
+    let resultVal = 0, resultType = '', cpr = null;
+    if (leads > 0)            { resultVal = leads;       resultType = 'Leads';       cpr = spend / leads; }
+    else if (purchases > 0)   { resultVal = purchases;   resultType = 'Purchases';   cpr = spend / purchases; }
+    else if (convos > 0)      { resultVal = convos;      resultType = 'Convos';      cpr = spend / convos; }
+    else if (thruPlays > 0)   { resultVal = thruPlays;   resultType = 'ThruPlays';   cpr = spend / thruPlays; }
+    else if (engagements > 0) { resultVal = engagements; resultType = 'Engagements'; cpr = spend / engagements; }
+
+    totalSpend       += spend;
+    totalImpressions += impressions;
+    totalReach       += reach;
+    totalClicks      += clicks;
+    totalLeads       += leads;
+    totalPurchases   += purchases;
+    totalConvos      += convos;
+    totalThruPlays   += thruPlays;
+    totalEngagements += engagements;
+    totalLPV         += lpv;
+
+    return {
+      name: c.campaign_name || c.campaign_id,
+      objective: c.objective || '',
+      spend, impressions, reach, clicks, freq, ctr, lpv,
+      thruPlays, leads, purchases, convos, engagements,
+      resultVal, resultType, cpr,
+      spendFmt: fmtC(spend),
+      cprFmt: cpr ? fmtC(cpr) : '—',
+    };
+  });
+
+  // Account-level primary result
+  let acctType = 'Results', acctTotal = 0;
+  if (totalLeads > 0)          { acctType = 'Leads';       acctTotal = totalLeads; }
+  else if (totalPurchases > 0) { acctType = 'Purchases';   acctTotal = totalPurchases; }
+  else if (totalConvos > 0)    { acctType = 'Convos';      acctTotal = totalConvos; }
+  else if (totalThruPlays > 0) { acctType = 'ThruPlays';   acctTotal = totalThruPlays; }
+  else if (totalEngagements > 0){ acctType = 'Engagements'; acctTotal = totalEngagements; }
+
+  const withCPR = camps.filter(c => c.cpr > 0);
+  const bestCPR = withCPR.length ? Math.min(...withCPR.map(c => c.cpr)) : null;
+
+  return {
+    camps,
+    totalSpend, totalImpressions, totalReach, totalClicks,
+    totalLeads, totalPurchases, totalConvos, totalThruPlays, totalEngagements, totalLPV,
+    acctType, acctTotal,
+    bestCPR,
+    totalSpendFmt: fmtC(totalSpend),
+    bestCPRFmt: bestCPR ? fmtC(bestCPR) : '—',
+    avgFreq: camps.length ? (camps.reduce((s,c) => s + c.freq, 0) / camps.length).toFixed(2) : '—',
+    avgCTR: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) + '%' : '—',
+  };
+}
+
+// ── SMART INSIGHTS ─────────────────────────────────────────────────
+function generateInsights(d) {
+  const camps = d.camps;
+  const insights = [];
+  const recs = [];
+
+  // Best performer
+  const withCPR = camps.filter(c => c.cpr > 0 && c.spend > 0);
+  if (withCPR.length) {
+    const best = withCPR.reduce((a, b) => a.cpr < b.cpr ? a : b);
+    insights.push({ type: 'good', icon: '🏆', title: 'Best Performing Campaign',
+      body: `<strong>${best.name}</strong> delivered the best results — ${fmtN(best.resultVal)} ${best.resultType.toLowerCase()} at ${best.cprFmt} each. CTR ${(best.ctr * 100).toFixed(2)}%, frequency ${best.freq.toFixed(2)}×.` });
+  }
+
+  // ThruPlays pool
+  if (d.totalThruPlays > 1000) {
+    insights.push({ type: 'good', icon: '🎯', title: 'Warm Video Audience Built',
+      body: `<strong>${fmtN(d.totalThruPlays)} people watched your videos in full.</strong> This is a high-intent audience already familiar with Veriseek — prime candidates for retargeting with a lead generation or waitlist campaign.` });
+    recs.push({ priority: 'GROWTH', title: 'Retarget ThruPlay Viewers with a Lead Campaign',
+      body: `Create a Custom Audience of people who watched 75–100% of your videos (${fmtN(d.totalThruPlays)} people) and run a native Lead Form campaign. This warm audience will convert at significantly lower CPL than cold traffic.` });
+  }
+
+  // High frequency warning
+  const highFreq = camps.filter(c => c.freq > 2.5 && c.spend > 0);
+  if (highFreq.length) {
+    const worst = highFreq.sort((a, b) => b.freq - a.freq)[0];
+    insights.push({ type: 'warn', icon: '🔻', title: 'Audience Fatigue Detected',
+      body: `<strong>${worst.name}</strong> reached frequency <strong>${worst.freq.toFixed(2)}×</strong> — your audience has seen this ad repeatedly. Creative refresh or audience expansion is needed to prevent further CPR deterioration.` });
+    recs.push({ priority: 'URGENT', title: 'Refresh Creative on High-Frequency Campaigns',
+      body: `${highFreq.map(c => c.name).join(', ')} — duplicate the ad set with new creative and pause the original. Reducing frequency below 2.0× typically restores engagement rates without any budget change.` });
+  }
+
+  // Landing page drop-off
+  if (d.totalClicks > 0 && d.totalLPV > 0) {
+    const dropOff = ((d.totalClicks - d.totalLPV) / d.totalClicks * 100).toFixed(0);
+    if (parseInt(dropOff) > 30) {
+      insights.push({ type: 'alert', icon: '⚙️', title: `${dropOff}% Click-to-LPV Drop-off`,
+        body: `${fmtN(d.totalClicks)} clicks but only ${fmtN(d.totalLPV)} people reached the landing page — a ${dropOff}% drop-off. This is a technical issue (slow page load, broken redirect, or mobile rendering problem) costing conversions every day.` });
+      recs.push({ priority: 'HIGH', title: 'Fix Landing Page Drop-off — Low Effort, High Impact',
+        body: `Audit the destination URL for mobile page speed (use Google PageSpeed Insights), redirect chains, and form rendering. A ${dropOff}% drop-off means roughly ${dropOff}% of your ad budget is being wasted at the last step before conversion.` });
+    }
+  }
+
+  // Reach milestone
+  if (d.totalReach > 10000) {
+    insights.push({ type: 'info', icon: '📢', title: `${fmtN(d.totalReach)} Unique People Reached`,
+      body: `Veriseek's brand is now visible to <strong>${fmtN(d.totalReach)} unique people</strong> this period — at an average frequency of ${d.avgFreq}×. This brand awareness pool is the foundation for all future conversion campaigns.` });
+  }
+
+  // No leads yet
+  if (d.totalLeads === 0 && d.totalPurchases === 0 && d.totalConvos === 0) {
+    insights.push({ type: 'info', icon: '🌱', title: 'Brand Awareness Phase — No Conversions Yet',
+      body: `Current campaigns are building reach and brand recall — no direct conversion objective is running. This is the right foundation before launching lead generation. The ${fmtN(d.totalThruPlays)} ThruPlays indicate the audience is warming up.` });
+    recs.push({ priority: 'HIGH', title: 'Launch a Lead Generation Campaign Now',
+      body: `The brand awareness groundwork is in place. Launch a Meta Lead Form campaign targeting the ${fmtN(d.totalThruPlays)} video viewers and ${fmtN(d.totalEngagements)} engagers built this period. Native lead forms remove the landing page dependency entirely.` });
+  }
+
+  // Budget efficiency
+  if (d.totalSpend > 0 && withCPR.length >= 2) {
+    const worst2 = withCPR.sort((a, b) => b.cpr - a.cpr)[0];
+    if (worst2.cpr > (d.bestCPR * 3)) {
+      recs.push({ priority: 'HIGH', title: `Pause "${worst2.name}" — CPR ${worst2.cprFmt} vs Best ${d.bestCPRFmt}`,
+        body: `This campaign's cost per result is ${(worst2.cpr / d.bestCPR).toFixed(1)}× higher than your best. Reallocating its budget to the top-performing campaign would deliver significantly more results for the same spend.` });
+    }
+  }
+
+  // Generic always-on rec
+  recs.push({ priority: 'MEDIUM', title: 'Test Advantage+ Audience on Active Campaigns',
+    body: `Switching ad sets to Advantage+ Audience allows Meta to automatically find the best-converting audience segments. Meta reports an average 9–10% lower cost per result for accounts using this feature — minimal setup, measurable impact.` });
+
+  return { insights: insights.slice(0, 6), recs: recs.slice(0, 4) };
+}
+
+// ── GENERATE REPORT ────────────────────────────────────────────────
+async function generateReport() {
+  const preset = PRESETS[selectedPreset];
+  const since = preset.since();
+  const until = preset.until();
+  const genBtn = document.getElementById('genBtn');
+  const content = document.getElementById('content');
+  const statusPill = document.getElementById('statusPill');
+
+  genBtn.classList.add('loading');
+  genBtn.disabled = true;
+  document.getElementById('genTxt').textContent = 'Generating…';
+  statusPill.textContent = '⏳ Fetching data…';
+
+  content.innerHTML = `
+    <div class="loading-wrap">
+      <div class="loading-title">Pulling live Meta data…</div>
+      <div class="loading-steps">
+        <div class="lstep active" id="ls1"><div class="lstep-ico">1</div>Fetching campaigns…</div>
+        <div class="lstep" id="ls2"><div class="lstep-ico">2</div>Loading insights…</div>
+        <div class="lstep" id="ls3"><div class="lstep-ico">3</div>Processing metrics…</div>
+        <div class="lstep" id="ls4"><div class="lstep-ico">4</div>Building report…</div>
+      </div>
+    </div>`;
+
+  try {
+    // Step 1: campaigns
+    const campsData = await metaAPI(`act_${ACCOUNT_ID}/campaigns`, {
+      fields: 'id,name,objective,effective_status',
+      limit: 50,
+    });
+    stepDone('ls1'); stepActive('ls2');
+
+    // Step 2: insights
+    const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`, {
+      fields: [
+        'campaign_id', 'campaign_name', 'objective',
+        'spend', 'impressions', 'reach', 'clicks', 'ctr', 'frequency', 'cpm', 'cpc',
+        'actions', 'cost_per_action_type',
+        'video_thruplay_watched_actions',
+        'landing_page_views',
+      ].join(','),
+      level: 'campaign',
+      time_range: JSON.stringify({ since, until }),
+      sort: 'spend_descending',
+      limit: 50,
+    });
+    stepDone('ls2'); stepActive('ls3');
+
+    const raw = insightsData.data || [];
+    if (raw.length === 0) {
+      throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
+    }
+
+    // Step 3: process
+    const d = processInsights(raw);
+    const smart = generateInsights(d);
+    stepDone('ls3'); stepActive('ls4');
+    await sleep(200);
+
+    // Step 4: build report
+    const fromFmt = new Date(since).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const toFmt   = new Date(until).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const genDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const html = buildReportHTML(d, smart, preset.label, fromFmt, toFmt, genDate);
+
+    stepDone('ls4');
+    await sleep(200);
+
+    window._reportHTML = html;
+
+    content.innerHTML = `
+      <div class="report-actions">
+        <div class="ra-info"><b>Veriseek AI</b> · ${preset.label} · ${fromFmt} → ${toFmt}</div>
+        <div class="ra-btns">
+          <button class="ra-btn sec" onclick="printReport()">🖨 Print / PDF</button>
+          <button class="ra-btn primary" onclick="downloadReport()">⬇ Download</button>
+        </div>
+      </div>
+      <div class="report-wrap" id="reportWrap">${html}</div>`;
+
+    statusPill.textContent = '✓ Report ready';
+    statusPill.style.background = '#DCFCE7';
+    statusPill.style.color = '#15803D';
+    statusPill.style.borderColor = '#BBF7D0';
+
+  } catch (err) {
+    content.innerHTML = `
+      <div class="err-box">
+        <h4>Failed to generate report</h4>
+        <p><code>${err.message}</code></p>
+        <p style="margin-top:8px">Check that the <code>META_ACCESS_TOKEN</code> environment variable is set in Vercel and the token has <code>ads_read</code> + <code>ads_management</code> permissions.</p>
+      </div>`;
+    statusPill.textContent = '✕ Error';
+    statusPill.style.background = '#FEE2E2';
+    statusPill.style.color = '#B91C1C';
+    statusPill.style.borderColor = '#FECACA';
+    console.error(err);
+  }
+
+  genBtn.classList.remove('loading');
+  genBtn.disabled = false;
+  document.getElementById('genTxt').textContent = 'Generate Report';
+}
+
+// ── BUILD REPORT HTML ──────────────────────────────────────────────
+function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
+  const objBadge = { OUTCOME_LEADS: ['bp', 'Leads'], OUTCOME_SALES: ['bt', 'Sales'],
+    OUTCOME_AWARENESS: ['bp', 'Awareness'], OUTCOME_ENGAGEMENT: ['ba', 'Engagement'],
+    OUTCOME_TRAFFIC: ['bt', 'Traffic'], LINK_CLICKS: ['bt', 'Traffic'] };
+  const priTag = { URGENT: 'tag-urgent', HIGH: 'tag-high', MEDIUM: 'tag-medium', GROWTH: 'tag-growth' };
+
+  // Funnel rows
+  const maxF = d.totalReach || 1;
+  const funnelRows = [
+    { label: 'Total Reach',         val: d.totalReach,       color: '#EEEDFE', fg: '#26215C', min: 120 },
+    d.totalThruPlays > 0 ? { label: 'Video ThruPlays', val: d.totalThruPlays, color: '#AFA9EC', fg: '#26215C', min: 80 } : null,
+    d.totalEngagements > 0 ? { label: 'Post Engagements', val: d.totalEngagements, color: '#5DCAA5', fg: '#04342C', min: 60 } : null,
+    d.totalClicks > 0 ? { label: 'Link Clicks', val: d.totalClicks, color: '#EF9F27', fg: '#412402', min: 44 } : null,
+    d.totalLPV > 0 ? { label: 'Landing Page Views', val: d.totalLPV, color: '#D97706', fg: '#fff', min: 36 } : null,
+    d.acctTotal > 0 && !['ThruPlays','Engagements'].includes(d.acctType)
+      ? { label: d.acctType, val: d.acctTotal, color: '#E24B4A', fg: '#501313', min: 30 } : null,
+  ].filter(Boolean);
+
+  return `
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.rpt{background:#F7F5F0;font-family:'DM Sans',sans-serif;color:#1A1714;font-size:14px;line-height:1.6;padding:48px 40px}
+.rh{border-bottom:1.5px solid #1A1714;padding-bottom:24px;margin-bottom:40px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+.rt{font-family:'DM Serif Display',serif;font-size:34px;line-height:1.1}
+.rt span{color:#C9A84C;font-style:italic}
+.rm{text-align:right;flex-shrink:0}.rm p{font-size:12px;color:#6B6560;line-height:1.9}
+.rm strong{color:#1A1714;font-weight:600}
+.sec{margin-bottom:44px}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sn{font-family:'DM Serif Display',serif;font-size:13px;color:#C9A84C;border:1px solid #C9A84C;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
+.st{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B6560}
+.div{border:none;border-top:1px solid #E2DDD5;margin:36px 0}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.sc{background:#fff;border:1px solid #E2DDD5;border-radius:12px;padding:18px}
+.sc.hl{background:#1A1714;border-color:#1A1714}
+.sc.hl .sl{color:#9E9890}.sc.hl .sv{color:#fff}.sc.hl .ss{color:#6B6560}
+.sl{font-size:10.5px;color:#6B6560;font-weight:500;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.sv{font-family:'DM Serif Display',serif;font-size:26px;color:#1A1714;line-height:1;margin-bottom:3px}
+.ss{font-size:11px;color:#9E9890}
+.ct{width:100%;border-collapse:collapse}
+.ct th{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6B6560;padding:8px 10px;text-align:left;border-bottom:1.5px solid #E2DDD5}
+.ct td{padding:12px 10px;border-bottom:1px solid #E2DDD5;font-size:12.5px;vertical-align:top}
+.ct tr:last-child td{border-bottom:none}
+.ct tr:hover td{background:#F0EDE6}
+.cn{font-weight:500;color:#1A1714;margin-bottom:2px;font-size:12.5px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.bp{background:#EAE8F7;color:#4C3FA0}.bt{background:#E0F5F1;color:#0F7B6C}.ba{background:#FEF3C7;color:#B45309}
+.num{font-weight:500;color:#1A1714}.nsub{font-size:10.5px;color:#9E9890;margin-top:2px}
+.sdot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px}
+.da{background:#15803D}.do{background:#9E9890}
+.fb{background:#fff;border:1px solid #E2DDD5;border-radius:14px;padding:24px}
+.fr{display:flex;align-items:center;gap:14px;margin-bottom:12px}.fr:last-child{margin-bottom:0}
+.fs{font-size:11.5px;color:#6B6560;min-width:150px;text-align:right;font-weight:500}
+.fw{flex:1;background:#F0EDE6;border-radius:5px;height:30px;overflow:hidden}
+.fb2{height:100%;border-radius:5px;display:flex;align-items:center;padding:0 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.fright{min-width:120px}.fv{font-size:12.5px;font-weight:600;color:#1A1714}.fp{font-size:10.5px;color:#9E9890}
+.fa{text-align:center;font-size:14px;color:#E2DDD5;margin:-6px 0 -2px 164px}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ic{border-radius:12px;padding:16px}
+.ic.warn{background:#FEF3C7;border:1px solid #FDE68A}
+.ic.good{background:#DCFCE7;border:1px solid #BBF7D0}
+.ic.alert{background:#FEE2E2;border:1px solid #FECACA}
+.ic.info{background:#EAE8F7;border:1px solid #C4B5FD}
+.ii{font-size:16px;margin-bottom:6px}
+.iti{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.ic.warn .iti{color:#B45309}.ic.good .iti{color:#15803D}.ic.alert .iti{color:#B91C1C}.ic.info .iti{color:#4C3FA0}
+.ib2{font-size:12.5px;line-height:1.55}
+.ic.warn .ib2{color:#78350F}.ic.good .ib2{color:#14532D}.ic.alert .ib2{color:#7F1D1D}.ic.info .ib2{color:#2E1065}
+.rl{list-style:none}
+.ri{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #E2DDD5}
+.ri:last-child{border-bottom:none}
+.rn{font-family:'DM Serif Display',serif;font-size:20px;color:#C9A84C;flex-shrink:0;min-width:26px;line-height:1}
+.rtit{font-size:13.5px;font-weight:600;color:#1A1714;margin-bottom:3px}
+.rb{font-size:12.5px;color:#6B6560;line-height:1.55}
+.rtag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:5px}
+.tag-urgent{background:#FEE2E2;color:#B91C1C}.tag-high{background:#FEF3C7;color:#B45309}
+.tag-medium{background:#EAE8F7;color:#4C3FA0}.tag-growth{background:#DCFCE7;color:#15803D}
+.foot{border-top:1.5px solid #1A1714;padding-top:18px;margin-top:44px;display:flex;justify-content:space-between;align-items:center}
+.fn{font-size:11px;color:#9E9890}
+@media print{.rpt{padding:28px}}
+</style>
+<div class="rpt">
+
+<div class="rh">
+  <div>
+    <div class="rt">Veriseek <span>AI</span><br>${periodLabel}</div>
+    <p style="font-size:12.5px;color:#6B6560;margin-top:6px">Meta Ads · Facebook &amp; Instagram · INR</p>
+  </div>
+  <div class="rm">
+    <p><strong>Period</strong> ${fromFmt} – ${toFmt}</p>
+    <p><strong>Platform</strong> Meta Ads</p>
+    <p><strong>Account</strong> #${ACCOUNT_ID}</p>
+    <p style="margin-top:4px;color:#9E9890">Generated ${genDate}</p>
+  </div>
+</div>
+
+<div class="sec">
+<div class="sh"><div class="sn">1</div><div class="st">Account Summary</div></div>
+<div class="sg">
+  <div class="sc hl"><div class="sl">Total Spend</div><div class="sv">${d.totalSpendFmt}</div><div class="ss">${periodLabel}</div></div>
+  <div class="sc"><div class="sl">Total Reach</div><div class="sv">${fmtN(d.totalReach)}</div><div class="ss">Unique people · Freq ${d.avgFreq}×</div></div>
+  <div class="sc"><div class="sl">Impressions</div><div class="sv">${fmtN(d.totalImpressions)}</div><div class="ss">Avg CTR ${d.avgCTR}</div></div>
+  <div class="sc"><div class="sl">${d.acctType || 'Results'}</div><div class="sv">${fmtN(d.acctTotal) || '—'}</div><div class="ss">Best ${d.bestCPRFmt} per result</div></div>
+</div>
+</div><hr class="div"/>
+
+<div class="sec">
+<div class="sh"><div class="sn">2</div><div class="st">Campaign Breakdown</div></div>
+<table class="ct">
+<thead><tr><th>Campaign</th><th>Type</th><th>Reach / Impressions</th><th>Primary Result</th><th>Spend · Freq</th></tr></thead>
+<tbody>
+${d.camps.map(c => {
+  const [bc, bl] = objBadge[c.objective] || ['bp', c.objective || '—'];
+  return `<tr>
+    <td><div class="cn"><span class="sdot ${c.spend > 0 ? 'da' : 'do'}"></span>${c.name}</div></td>
+    <td><span class="badge ${bc}">${bl}</span></td>
+    <td><div class="num">${fmtN(c.reach)} reach</div><div class="nsub">${fmtN(c.impressions)} impr · ${c.freq.toFixed(2)}× freq</div></td>
+    <td><div class="num">${c.resultVal ? fmtN(c.resultVal) + ' ' + c.resultType : '—'}</div><div class="nsub">${c.cpr ? 'Cost: ' + c.cprFmt : ''}</div></td>
+    <td><div class="num">${c.spendFmt}</div><div class="nsub">Freq ${c.freq.toFixed(2)}×</div></td>
+  </tr>`;
+}).join('')}
+</tbody></table>
+</div><hr class="div"/>
+
+${d.totalReach > 0 ? `
+<div class="sec">
+<div class="sh"><div class="sn">3</div><div class="st">Full Funnel — Reach to Results</div></div>
+<div class="fb">
+${funnelRows.map((f, i) => `
+${i > 0 ? `<div class="fa">↓</div>` : ''}
+<div class="fr">
+  <div class="fs">${f.label}</div>
+  <div class="fw"><div class="fb2" style="width:${Math.max(f.min / 8, Math.min(100, f.val / maxF * 100)).toFixed(1)}%;background:${f.color};color:${f.fg};min-width:${f.min}px">${fmtN(f.val)}</div></div>
+  <div class="fright"><div class="fv">${fmtN(f.val)}</div><div class="fp">${(f.val / maxF * 100).toFixed(f.val > 1000 ? 1 : 3)}% of reach</div></div>
+</div>`).join('')}
+</div>
+</div><hr class="div"/>` : ''}
+
+${smart.insights.length ? `
+<div class="sec">
+<div class="sh"><div class="sn">${d.totalReach > 0 ? 4 : 3}</div><div class="st">Key Insights</div></div>
+<div class="ig">
+${smart.insights.map(i => `
+<div class="ic ${i.type}">
+  <div class="ii">${i.icon}</div>
+  <div class="iti">${i.title}</div>
+  <div class="ib2">${i.body}</div>
+</div>`).join('')}
+</div>
+</div><hr class="div"/>` : ''}
+
+${smart.recs.length ? `
+<div class="sec">
+<div class="sh"><div class="sn">${d.totalReach > 0 ? 5 : 4}</div><div class="st">Our Recommendations</div></div>
+<ul class="rl">
+${smart.recs.map((r, i) => `
+<li class="ri">
+  <div class="rn">${i + 1}</div>
+  <div>
+    <div class="rtit">${r.title}</div>
+    <div class="rb">${r.body}</div>
+    <span class="rtag ${priTag[r.priority] || 'tag-medium'}">${r.priority}</span>
+  </div>
+</li>`).join('')}
+</ul>
+</div>` : ''}
+
+<div class="foot">
+  <div class="fn">Veriseek AI · Meta Ads · ${fromFmt} – ${toFmt}</div>
+  <div class="fn" style="font-weight:600">Prepared by Meraki Ads</div>
+</div>
+
+</div>`;
+}
+
+// ── DOWNLOAD & PRINT ───────────────────────────────────────────────
+function downloadReport() {
+  if (!window._reportHTML) return;
+  const full = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Veriseek AI — Meta Ads Report</title></head><body>${window._reportHTML}</body></html>`;
+  const blob = new Blob([full], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Veriseek_Meta_Report_${selectedPreset}.html`;
+  a.click();
+}
+
+function printReport() {
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Veriseek AI — Meta Ads Report</title></head><body>${window._reportHTML}</body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
+}
+</script>
+</body>
+</html>

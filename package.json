@@ -1,0 +1,9 @@
+{
+  "name": "veriseek-meta-report",
+  "version": "1.0.0",
+  "description": "Veriseek AI — Live Meta Ads Report Generator",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
