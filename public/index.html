@@ -429,20 +429,31 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    // LPV — comes as an action type in the actions array
-    const lpv = getAction(c.actions, [
-      'landing_page_view',
-      'offsite_conversion.fb_pixel_landing_page_view',
-    ]);
+    // all_conversion_types comes from the Insights API response
+    // e.g. "34 (Website landing page views)", "5 (Subscribe)"
+    const allTypes = Array.isArray(c.all_conversion_types) ? c.all_conversion_types : [];
 
-    // Form submissions — pixel lead / registration / subscribe events
-    const formSubmissions = getAction(c.actions, [
-      'offsite_conversion.fb_pixel_lead',
-      'offsite_conversion.fb_pixel_complete_registration',
-      'lead',
-      'subscribe',
-      'offsite_conversion.fb_pixel_subscribe',
-    ]);
+    function extractFromAllTypes(keyword) {
+      for (const s of allTypes) {
+        if (typeof s === 'string' && s.toLowerCase().includes(keyword.toLowerCase())) {
+          const m = s.match(/^([\d,]+)/);
+          if (m) return parseInt(m[1].replace(/,/g,''))||0;
+        }
+      }
+      return 0;
+    }
+
+    // LPV — from all_conversion_types
+    const lpv = extractFromAllTypes('landing page view');
+
+    // Form submissions — Subscribe event from all_conversion_types
+    const formSubmissions = extractFromAllTypes('subscribe')
+      || getAction(c.actions, [
+           'offsite_conversion.fb_pixel_lead',
+           'offsite_conversion.fb_pixel_complete_registration',
+           'lead',
+           'subscribe',
+         ]);
 
     return {
       name: c.campaign_name||c.campaign_id,
@@ -577,7 +588,7 @@ async function generateReport() {
 
     // Step 2
     const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
-      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions'].join(','),
+      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions','all_conversion_types'].join(','),
       level:'campaign',
       time_range:JSON.stringify({since,until}),
       sort:'impressions_descending',
