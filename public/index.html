@@ -3,183 +3,225 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Veriseek — Meta Ads Report</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>Veriseek AI — Meta Ads Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --purple:    #4C3FA0;
-  --purple-lt: #EAE8F7;
-  --purple-bd: #C4B5FD;
-  --teal:      #0F7B6C;
-  --teal-lt:   #E0F5F1;
-  --amber:     #B45309;
-  --amber-lt:  #FEF3C7;
-  --red:       #B91C1C;
-  --red-lt:    #FEE2E2;
-  --green:     #15803D;
-  --green-lt:  #DCFCE7;
-  --gold:      #C9A84C;
-  --bg:        #F7F5F0;
-  --surface:   #FFFFFF;
-  --surface2:  #F0EDE6;
-  --border:    #E2DDD5;
-  --text:      #1A1714;
-  --muted:     #6B6560;
-  --hint:      #9E9890;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#7DC242;--green-dk:#5a9a28;--green-lt:rgba(125,194,66,0.10);--green-bd:rgba(125,194,66,0.28);
+  --blue:#29ABE2;--blue-dk:#1478aa;
+  --red:#E05252;--red-lt:rgba(224,82,82,0.08);--red-bd:rgba(224,82,82,0.28);
+  --amber:#D97706;--amber-lt:rgba(217,119,6,0.08);--amber-bd:rgba(217,119,6,0.28);
+  --purple:#4C3FA0;--purple-lt:#EAE8F7;--purple-bd:#C4B5FD;
+  --teal:#0F7B6C;--teal-lt:#E0F5F1;
+  --gold:#C9A84C;
+  --bg:#FAFAF7;--card:#FFFFFF;--border:#E8EBE3;--border-md:#D0D5C8;
+  --text:#1a1a1a;--text2:#4a5240;--text3:#8a9280;
+  --sh:0 4px 20px rgba(0,0,0,0.08);--sh-sm:0 1px 4px rgba(0,0,0,0.06);
 }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* ── APP SHELL ── */
-.app { display: flex; flex-direction: column; min-height: 100vh; }
+/* ── BOTANICAL BG ── */
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-layer svg{position:absolute;fill:#7DC242}
+.bl-1{top:-40px;left:-60px;width:340px;opacity:.05;transform:rotate(-18deg)}
+.bl-2{top:10px;right:-80px;width:400px;opacity:.04;transform:rotate(16deg)scaleX(-1)}
+.bl-3{bottom:-60px;right:-40px;width:380px;opacity:.05;transform:rotate(-14deg)}
+.bl-4{top:45%;left:-50px;width:260px;opacity:.03;transform:rotate(8deg)}
+.wm{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.wm span{font-family:'Dancing Script',cursive;font-size:130px;font-weight:700;color:#7DC242;opacity:.04;transform:rotate(-18deg);white-space:nowrap;user-select:none}
 
-/* ── HEADER ── */
-.header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.brand { display: flex; align-items: center; gap: 14px; }
-.brand-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
-.brand-name span { color: var(--gold); font-style: italic; }
-.brand-divider { width: 1px; height: 20px; background: var(--border); }
-.brand-sub { font-size: 12px; color: var(--muted); font-weight: 500; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.status-pill {
-  font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
-  background: var(--purple-lt); color: var(--purple); border: 1px solid var(--purple-bd);
-}
+/* ══════════════════════════════════════
+   PASSWORD GATE
+══════════════════════════════════════ */
+.gate{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.gate.hidden{display:none}
+.gate-card{background:var(--card);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:var(--sh);border:1px solid var(--border);text-align:center;position:relative;z-index:2}
+.gate-logo{font-family:'Dancing Script',cursive;font-size:32px;font-weight:700;margin-bottom:6px}
+.gate-logo .m{color:var(--green)}.gate-logo .a{color:var(--blue)}
+.gate-client{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:4px}
+.gate-client span{color:var(--gold);font-style:italic}
+.gate-sub{font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.5}
+.gate-quote{font-family:'DM Serif Display',serif;font-size:13px;color:var(--text3);font-style:italic;margin-bottom:24px;padding:0 12px;line-height:1.6;min-height:40px}
+.gate-input-wrap{position:relative;margin-bottom:12px}
+.gate-input{width:100%;padding:12px 44px 12px 16px;border-radius:10px;border:1.5px solid var(--border-md);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;text-align:center;letter-spacing:.1em}
+.gate-input:focus{border-color:var(--green)}
+.gate-input.error{border-color:var(--red);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.gate-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:15px;opacity:.4}
+.gate-btn{width:100%;padding:13px;border-radius:10px;background:var(--green);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.02em}
+.gate-btn:hover{background:var(--green-dk);box-shadow:0 4px 16px rgba(125,194,66,.3)}
+.gate-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+.gate-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
+.gate-dot{width:6px;height:6px;border-radius:50%;background:var(--border-md)}
 
-/* ── CONTROLS BAR ── */
-.controls {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 32px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.date-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-right: 4px; }
-.date-btn {
-  font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px;
-  border: 1.5px solid var(--border); background: transparent; color: var(--muted);
-  cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif;
-}
-.date-btn:hover { border-color: var(--purple); color: var(--purple); }
-.date-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
-.ctrl-divider { width: 1px; height: 24px; background: var(--border); margin: 0 6px; }
-.gen-btn {
-  margin-left: auto;
-  padding: 8px 22px; border-radius: 8px; background: var(--purple);
-  border: none; color: #fff; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s;
-  display: flex; align-items: center; gap: 8px;
-}
-.gen-btn:hover { background: #3730a3; box-shadow: 0 4px 14px rgba(76,63,160,.3); }
-.gen-btn:disabled { background: var(--hint); cursor: not-allowed; box-shadow: none; }
-.gen-btn .spin {
-  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3);
-  border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none;
-}
-.gen-btn.loading .spin { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ══════════════════════════════════════
+   APP
+══════════════════════════════════════ */
+.app{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column}
+.app.locked{filter:blur(4px);pointer-events:none;user-select:none}
 
-/* ── CONTENT AREA ── */
-.content { flex: 1; padding: 36px 32px 60px; max-width: 980px; margin: 0 auto; width: 100%; }
+/* TOPBAR */
+.topbar{background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.logo{font-family:'Dancing Script',cursive;font-size:26px;font-weight:700;text-decoration:none;user-select:none}
+.logo .m{color:var(--green)}.logo .a{color:var(--blue)}
+.topbar-center{display:flex;align-items:center;gap:6px}
+.topbar-divider{width:1px;height:18px;background:var(--border-md)}
+.topbar-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.status-pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:var(--green-lt);color:var(--green-dk);border:1px solid var(--green-bd);transition:all .3s}
 
-/* ── EMPTY STATE ── */
-.empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 80px 20px; color: var(--hint); text-align: center; gap: 14px;
-}
-.empty-icon { font-size: 52px; opacity: .5; }
-.empty h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--muted); }
-.empty p { font-size: 13.5px; line-height: 1.7; max-width: 340px; }
+/* CONTROLS BAR */
+.controls{background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctrl-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-right:2px}
+.date-btn{font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.date-btn:hover{border-color:var(--green-bd);color:var(--green-dk)}
+.date-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+.ctrl-divider{width:1px;height:22px;background:var(--border);margin:0 4px;flex-shrink:0}
 
-/* ── LOADING ── */
-.loading-wrap {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 80px 20px; gap: 12px;
-}
-.loading-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--muted); }
-.loading-steps { display: flex; flex-direction: column; gap: 6px; width: 260px; margin-top: 8px; }
-.lstep {
-  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-  border-radius: 8px; background: var(--surface); border: 1px solid var(--border);
-  font-size: 12px; color: var(--hint); transition: all .25s;
-}
-.lstep.active { border-color: var(--purple-bd); background: var(--purple-lt); color: var(--purple); }
-.lstep.done { color: var(--hint); }
-.lstep-ico {
-  width: 18px; height: 18px; border-radius: 50%; background: var(--border);
-  display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0;
-}
-.lstep.active .lstep-ico { background: var(--purple); color: #fff; animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* CUSTOM DATE RANGE */
+.custom-range{display:none;align-items:center;gap:6px}
+.custom-range.show{display:flex}
+.date-input{padding:5px 10px;border-radius:8px;border:1.5px solid var(--border-md);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);outline:none;transition:border-color .15s;cursor:pointer}
+.date-input:focus{border-color:var(--green)}
+.date-sep{font-size:12px;color:var(--text3);font-weight:500}
+.apply-btn{font-size:12px;font-weight:600;padding:5px 13px;border-radius:8px;background:var(--green);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.apply-btn:hover{background:var(--green-dk)}
 
-/* ── REPORT ACTIONS BAR ── */
-.report-actions {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; margin-bottom: 24px;
-}
-.ra-info { font-size: 13px; color: var(--muted); }
-.ra-info b { color: var(--text); }
-.ra-btns { display: flex; gap: 8px; }
-.ra-btn {
-  font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 8px;
-  cursor: pointer; transition: all .12s; border: 1.5px solid; font-family: 'DM Sans', sans-serif;
-}
-.ra-btn.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
-.ra-btn.primary:hover { background: #3730a3; }
-.ra-btn.sec { background: transparent; border-color: var(--border); color: var(--muted); }
-.ra-btn.sec:hover { border-color: var(--purple); color: var(--purple); }
+/* GEN BTN */
+.gen-btn{margin-left:auto;padding:8px 20px;border-radius:8px;background:var(--green);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.gen-btn:hover{background:var(--green-dk);box-shadow:0 4px 14px rgba(125,194,66,.3)}
+.gen-btn:disabled{background:var(--border-md);cursor:not-allowed;box-shadow:none}
+.gen-btn .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.gen-btn.loading .spin{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── ERROR ── */
-.err-box {
-  background: var(--red-lt); border: 1.5px solid #FECACA;
-  border-radius: 10px; padding: 16px 20px;
-}
-.err-box h4 { font-size: 13px; font-weight: 700; color: var(--red); margin-bottom: 6px; }
-.err-box p { font-size: 12.5px; color: #7f1d1d; line-height: 1.6; }
-.err-box code { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 3px; }
+/* QUOTE BAR */
+.quote-bar{background:rgba(125,194,66,0.04);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;justify-content:center;gap:8px}
+.quote-text{font-family:'DM Serif Display',serif;font-size:13px;color:var(--text3);font-style:italic;text-align:center}
+.quote-text span{color:var(--gold)}
 
-/* ── REPORT STYLES (injected into report container) ── */
-.report-wrap { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+/* CONTENT */
+.content{flex:1;padding:32px 28px 60px;max-width:960px;margin:0 auto;width:100%}
 
-/* inline report CSS is in the buildReport() function */
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--text3);text-align:center;gap:12px}
+.empty-icon{font-size:48px;opacity:.4}
+.empty h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text2)}
+.empty p{font-size:13px;line-height:1.7;max-width:320px}
+
+/* LOADING */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:12px}
+.loading-logo{font-family:'Dancing Script',cursive;font-size:24px;font-weight:700;margin-bottom:2px}
+.loading-logo .m{color:var(--green)}.loading-logo .a{color:var(--blue)}
+.loading-sub{font-size:13px;color:var(--text3);margin-bottom:16px}
+.loading-steps{display:flex;flex-direction:column;gap:5px;width:240px}
+.lstep{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--text3);transition:all .25s}
+.lstep.active{border-color:var(--green-bd);background:var(--green-lt);color:var(--green-dk)}
+.lstep.done{color:var(--text3)}
+.lstep-ico{width:17px;height:17px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.lstep.active .lstep-ico{background:var(--green);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* REPORT ACTIONS */
+.report-actions{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;margin-bottom:22px}
+.ra-info{font-size:12.5px;color:var(--text3)}.ra-info b{color:var(--text)}
+.ra-btns{display:flex;gap:7px}
+.ra-btn{font-size:12px;font-weight:600;padding:6px 15px;border-radius:8px;cursor:pointer;transition:all .12s;border:1.5px solid;font-family:'DM Sans',sans-serif}
+.ra-btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.ra-btn.primary:hover{background:var(--green-dk)}
+.ra-btn.sec{background:transparent;border-color:var(--border-md);color:var(--text3)}
+.ra-btn.sec:hover{border-color:var(--green-bd);color:var(--green-dk)}
+
+/* REPORT WRAP */
+.report-wrap{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--sh-sm)}
+
+/* ERROR */
+.err-box{background:var(--red-lt);border:1.5px solid var(--red-bd);border-radius:10px;padding:16px 20px}
+.err-box h4{font-size:13px;font-weight:700;color:var(--red);margin-bottom:5px}
+.err-box p{font-size:12.5px;color:#7f1d1d;line-height:1.6}
+.err-box code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px}
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="brand">
-      <div class="brand-name">Veriseek <span>AI</span></div>
-      <div class="brand-divider"></div>
-      <div class="brand-sub">Meta Ads Performance Report</div>
+<!-- BOTANICAL BG -->
+<div class="bg-layer">
+  <svg class="bl-1" viewBox="0 0 200 300"><path d="M100 0C60 20 10 60 5 120S40 240 100 280c60-40 100-100 95-160S140 20 100 0zm0 30c-30 20-70 60-72 110l27-30c-5 30-3 60 10 85l15-35c-2 25 8 50 20 65 12-15 22-40 20-65l15 35c13-25 15-55 10-85l27 30C173 90 130 50 100 30z"/></svg>
+  <svg class="bl-2" viewBox="0 0 200 300"><path d="M100 0C60 20 10 60 5 120S40 240 100 280c60-40 100-100 95-160S140 20 100 0z"/></svg>
+  <svg class="bl-3" viewBox="0 0 200 300"><path d="M100 0C60 20 10 60 5 120S40 240 100 280c60-40 100-100 95-160S140 20 100 0zm0 30c-30 20-70 60-72 110l27-30c-5 30-3 60 10 85l15-35c-2 25 8 50 20 65 12-15 22-40 20-65l15 35c13-25 15-55 10-85l27 30C173 90 130 50 100 30z"/></svg>
+  <svg class="bl-4" viewBox="0 0 200 300"><path d="M100 0C60 20 10 60 5 120S40 240 100 280c60-40 100-100 95-160S140 20 100 0z"/></svg>
+</div>
+<div class="wm"><span>merakiads</span></div>
+
+<!-- ════════════════════════════════════
+     PASSWORD GATE
+════════════════════════════════════ -->
+<div class="gate" id="gate">
+  <!-- re-use botanical leaves inside gate too -->
+  <div class="gate-card">
+    <div class="gate-logo"><span class="m">meraki</span><span class="a">ads</span></div>
+    <div class="gate-client">Veriseek <span>AI</span></div>
+    <div class="gate-sub">Meta Ads Performance Report</div>
+    <div class="gate-dots">
+      <div class="gate-dot"></div><div class="gate-dot"></div><div class="gate-dot"></div>
     </div>
-    <div class="header-right">
+    <div class="gate-quote" id="gateQuote">
+      "Data is the new oil — but only if you know how to refine it."
+    </div>
+    <div class="gate-input-wrap">
+      <input type="password" class="gate-input" id="gateInput" placeholder="Enter password" autocomplete="off" maxlength="32"/>
+      <span class="gate-eye" onclick="toggleGateEye()">👁</span>
+    </div>
+    <div class="gate-err" id="gateErr"></div>
+    <button class="gate-btn" onclick="checkPassword()">Enter Report →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MAIN APP
+════════════════════════════════════ -->
+<div class="app locked" id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <a class="logo" href="#"><span class="m">meraki</span><span class="a">ads</span></a>
+    <div class="topbar-center">
+      <div class="topbar-divider"></div>
+      <span class="topbar-lbl">Veriseek AI · Meta Report</span>
+    </div>
+    <div class="topbar-right">
       <span class="status-pill" id="statusPill">● Ready</span>
     </div>
   </div>
 
-  <!-- CONTROLS -->
+  <!-- QUOTE BAR -->
+  <div class="quote-bar">
+    <div class="quote-text" id="appQuote">
+      "The goal is to turn data into information, and information into <span>insight</span>."
+    </div>
+  </div>
+
+  <!-- CONTROLS BAR -->
   <div class="controls">
-    <span class="date-label">Period</span>
-    <button class="date-btn" data-preset="last_7d">Last 7 Days</button>
-    <button class="date-btn active" data-preset="last_30d">Last 30 Days</button>
+    <span class="ctrl-label">Period</span>
+    <button class="date-btn" data-preset="last_7d">Last 7D</button>
+    <button class="date-btn active" data-preset="last_30d">Last 30D</button>
     <button class="date-btn" data-preset="this_month">This Month</button>
     <button class="date-btn" data-preset="last_month">Last Month</button>
+    <button class="date-btn" data-preset="custom" id="customToggle">Custom ▾</button>
+
+    <!-- Custom date range -->
+    <div class="custom-range" id="customRange">
+      <div class="ctrl-divider"></div>
+      <span class="ctrl-label">From</span>
+      <input type="date" class="date-input" id="dateFrom"/>
+      <span class="date-sep">→</span>
+      <span class="ctrl-label">To</span>
+      <input type="date" class="date-input" id="dateTo"/>
+      <button class="apply-btn" onclick="applyCustomDate()">Apply</button>
+    </div>
+
     <div class="ctrl-divider"></div>
     <button class="gen-btn" id="genBtn" onclick="generateReport()">
       <div class="spin"></div>
@@ -190,254 +232,301 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <!-- CONTENT -->
   <div class="content" id="content">
     <div class="empty">
-      <div class="empty-icon">📊</div>
+      <div class="empty-icon">🌿</div>
       <h2>Ready to generate</h2>
-      <p>Select a date range above and click <strong>Generate Report</strong> to pull live data from Meta Ads and build a client-ready report.</p>
+      <p>Select a date range above and click <strong>Generate Report</strong> to pull live data directly from Meta Ads.</p>
     </div>
   </div>
-
 </div>
 
 <script>
-// ── CONFIG ─────────────────────────────────────────────────────────
-const ACCOUNT_ID = '3252000788333236';
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const ACCOUNT_ID  = '3252000788333236';
 const CLIENT_NAME = 'Veriseek AI';
-const CURRENCY = 'INR';
-const CUR_SYMBOL = '₹';
+const CURRENCY    = 'INR';
+const CUR         = '₹';
+// Password — change this to whatever you want
+const PASSWORD    = 'meraki2024';
 
-// ── STATE ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// QUOTES — rotating on gate + app bar
+// ══════════════════════════════════════════
+const QUOTES = [
+  { q: 'Data is the new oil — but only if you know how to refine it.', a: null },
+  { q: 'The goal is to turn data into information, and information into <span>insight</span>.', a: 'Carly Fiorina' },
+  { q: 'Without data, you\'re just another person with an <span>opinion</span>.', a: 'W. Edwards Deming' },
+  { q: 'Marketing without data is like driving with your <span>eyes closed</span>.', a: 'Dan Zarrella' },
+  { q: 'Not everything that can be counted counts. Not everything that counts can be <span>counted</span>.', a: null },
+  { q: 'In God we trust. All others must bring <span>data</span>.', a: 'W. Edwards Deming' },
+  { q: 'The best marketing doesn\'t feel like <span>marketing</span>.', a: 'Tom Fishburne' },
+  { q: 'An investment in knowledge pays the best <span>interest</span>.', a: 'Benjamin Franklin' },
+  { q: 'What gets measured gets <span>managed</span>.', a: 'Peter Drucker' },
+  { q: 'Half the money I spend on advertising is wasted; the trouble is I don\'t know which <span>half</span>.', a: 'John Wanamaker' },
+];
+
+const todayQ = QUOTES[new Date().getDate() % QUOTES.length];
+document.getElementById('gateQuote').innerHTML = `"${todayQ.q}"${todayQ.a ? `<br><em style="font-size:11px;color:var(--gold)">— ${todayQ.a}</em>` : ''}`;
+const appQ = QUOTES[(new Date().getDate() + 3) % QUOTES.length];
+document.getElementById('appQuote').innerHTML = `"${appQ.q}"${appQ.a ? ` — <em style="color:var(--gold)">${appQ.a}</em>` : ''}`;
+
+// ══════════════════════════════════════════
+// PASSWORD GATE
+// ══════════════════════════════════════════
+// Check session storage so refresh doesn't re-lock
+if (sessionStorage.getItem('vrs_auth') === '1') unlockApp();
+
+document.getElementById('gateInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+  document.getElementById('gateErr').textContent = '';
+  document.getElementById('gateInput').classList.remove('error');
+});
+
+function toggleGateEye() {
+  const inp = document.getElementById('gateInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function checkPassword() {
+  const val = document.getElementById('gateInput').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem('vrs_auth', '1');
+    unlockApp();
+  } else {
+    const inp = document.getElementById('gateInput');
+    inp.classList.add('error');
+    document.getElementById('gateErr').textContent = 'Incorrect password. Try again.';
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('error'), 400);
+  }
+}
+
+function unlockApp() {
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.remove('locked');
+  // Set default dates for custom picker
+  const t = new Date(), m = new Date();
+  m.setDate(m.getDate() - 30);
+  document.getElementById('dateTo').value   = t.toISOString().split('T')[0];
+  document.getElementById('dateFrom').value = m.toISOString().split('T')[0];
+}
+
+// ══════════════════════════════════════════
+// DATE PRESETS
+// ══════════════════════════════════════════
 let selectedPreset = 'last_30d';
+let customSince = null, customUntil = null;
 
-// ── DATE PRESETS ───────────────────────────────────────────────────
 const PRESETS = {
-  last_7d:    { label: 'Last 7 Days',   since: () => daysAgo(7),       until: () => today() },
-  last_30d:   { label: 'Last 30 Days',  since: () => daysAgo(30),      until: () => today() },
-  this_month: { label: 'This Month',    since: () => firstOfMonth(),   until: () => today() },
+  last_7d:    { label: 'Last 7 Days',   since: () => daysAgo(7),         until: () => today() },
+  last_30d:   { label: 'Last 30 Days',  since: () => daysAgo(30),        until: () => today() },
+  this_month: { label: 'This Month',    since: () => firstOfMonth(),     until: () => today() },
   last_month: { label: 'Last Month',    since: () => firstOfLastMonth(), until: () => lastOfLastMonth() },
+  custom:     { label: 'Custom Range',  since: () => customSince,        until: () => customUntil },
 };
-function today() { return new Date().toISOString().split('T')[0]; }
-function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().split('T')[0]; }
-function firstOfMonth() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; }
-function firstOfLastMonth() { const d = new Date(new Date().getFullYear(), new Date().getMonth()-1, 1); return d.toISOString().split('T')[0]; }
-function lastOfLastMonth() { const d = new Date(new Date().getFullYear(), new Date().getMonth(), 0); return d.toISOString().split('T')[0]; }
 
-// ── DATE BUTTONS ───────────────────────────────────────────────────
+function today()            { return new Date().toISOString().split('T')[0]; }
+function daysAgo(n)         { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().split('T')[0]; }
+function firstOfMonth()     { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; }
+function firstOfLastMonth() { const d=new Date(new Date().getFullYear(),new Date().getMonth()-1,1); return d.toISOString().split('T')[0]; }
+function lastOfLastMonth()  { const d=new Date(new Date().getFullYear(),new Date().getMonth(),0); return d.toISOString().split('T')[0]; }
+function fmtDate(s)         { return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+
 document.querySelectorAll('.date-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
+  btn.addEventListener('click', function() {
     document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     selectedPreset = this.dataset.preset;
+    document.getElementById('customRange').classList.toggle('show', selectedPreset === 'custom');
   });
 });
 
-// ── API CALL (goes through /api/meta proxy) ────────────────────────
+function applyCustomDate() {
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  if (!from || !to) { alert('Please select both dates.'); return; }
+  if (from > to)    { alert('Start date must be before end date.'); return; }
+  customSince = from; customUntil = to;
+  PRESETS.custom.label = `${fmtDate(from)} – ${fmtDate(to)}`;
+  generateReport();
+}
+
+// ══════════════════════════════════════════
+// API PROXY CALL
+// ══════════════════════════════════════════
 async function metaAPI(endpoint, params = {}) {
   const url = new URL('/api/meta', window.location.origin);
   url.searchParams.set('endpoint', endpoint);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v));
-  const res = await fetch(url.toString());
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v));
+  const res  = await fetch(url.toString());
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   return data;
 }
 
-// ── STEP HELPERS ───────────────────────────────────────────────────
-function stepDone(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove('active'); el.classList.add('done');
-  el.querySelector('.lstep-ico').textContent = '✓';
-}
+// ══════════════════════════════════════════
+// STEP HELPERS
+// ══════════════════════════════════════════
+function stepDone(id)   { const e=document.getElementById(id); if(!e) return; e.classList.remove('active'); e.classList.add('done'); e.querySelector('.lstep-ico').textContent='✓'; }
 function stepActive(id) { document.getElementById(id)?.classList.add('active'); }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms)      { return new Promise(r=>setTimeout(r,ms)); }
 
-// ── NUMBER FORMAT ──────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// NUMBER FORMAT
+// ══════════════════════════════════════════
 function fmtN(n) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  if (n >= 10000000) return (n/10000000).toFixed(2) + 'Cr';
-  if (n >= 100000)   return (n/100000).toFixed(1)   + 'L';
-  if (n >= 1000)     return (n/1000).toFixed(1)      + 'K';
-  if (n < 10)        return parseFloat(n.toFixed(2)).toString();
+  if (n===null||n===undefined||isNaN(n)) return '—';
+  if (n>=10000000) return (n/10000000).toFixed(2)+'Cr';
+  if (n>=100000)   return (n/100000).toFixed(1)+'L';
+  if (n>=1000)     return (n/1000).toFixed(1)+'K';
+  if (n<10)        return parseFloat(n.toFixed(2)).toString();
   return Math.round(n).toLocaleString('en-IN');
 }
-function fmtC(n) { return n ? `${CUR_SYMBOL}${fmtN(n)}` : '—'; }
+function fmtC(n) { return n ? `${CUR}${fmtN(n)}` : '—'; }
 
-// ── EXTRACT ACTION VALUE FROM META RESPONSE ────────────────────────
+// ══════════════════════════════════════════
+// ACTION HELPERS
+// ══════════════════════════════════════════
 function getAction(actions, types) {
   if (!actions) return 0;
-  for (const t of (Array.isArray(types) ? types : [types])) {
+  for (const t of (Array.isArray(types)?types:[types])) {
     const a = actions.find(x => x.action_type === t);
     if (a) return parseInt(a.value) || 0;
   }
   return 0;
 }
 
-// ── PROCESS RAW INSIGHTS ───────────────────────────────────────────
+// ══════════════════════════════════════════
+// PROCESS INSIGHTS
+// ══════════════════════════════════════════
 function processInsights(raw) {
-  let totalSpend = 0, totalImpressions = 0, totalReach = 0, totalClicks = 0;
-  let totalLeads = 0, totalPurchases = 0, totalConvos = 0, totalThruPlays = 0;
-  let totalEngagements = 0, totalLPV = 0;
+  let totalImpressions=0, totalReach=0, totalClicks=0;
+  let totalLeads=0, totalPurchases=0, totalConvos=0, totalThruPlays=0, totalEngagements=0;
 
   const camps = raw.map(c => {
-    const spend       = parseFloat(c.spend || 0);
-    const impressions = parseInt(c.impressions || 0);
-    const reach       = parseInt(c.reach || 0);
-    const clicks      = parseInt(c.clicks || 0);
-    const freq        = parseFloat(c.frequency || 0);
-    const ctr         = parseFloat(c.ctr || 0);
-    const lpv         = 0; // landing_page_views not available for this account type
+    const impressions = parseInt(c.impressions||0);
+    const reach       = parseInt(c.reach||0);
+    const clicks      = parseInt(c.clicks||0);
+    const freq        = parseFloat(c.frequency||0);
+    const ctr         = parseFloat(c.ctr||0);
     const thruPlays   = c.video_thruplay_watched_actions
-                          ? parseInt(c.video_thruplay_watched_actions[0]?.value || 0) : 0;
-
+                          ? parseInt(c.video_thruplay_watched_actions[0]?.value||0) : 0;
     const leads       = getAction(c.actions, ['lead','leadgen_grouped','offsite_conversion.fb_pixel_lead','onsite_conversion.lead_grouped']);
     const purchases   = getAction(c.actions, ['purchase','offsite_conversion.fb_pixel_purchase']);
     const convos      = getAction(c.actions, ['onsite_conversion.messaging_conversation_started_7d']);
     const engagements = getAction(c.actions, ['post_engagement','page_engagement']);
 
-    // Primary result
-    let resultVal = 0, resultType = '', cpr = null;
-    if (leads > 0)            { resultVal = leads;       resultType = 'Leads';       cpr = spend / leads; }
-    else if (purchases > 0)   { resultVal = purchases;   resultType = 'Purchases';   cpr = spend / purchases; }
-    else if (convos > 0)      { resultVal = convos;      resultType = 'Convos';      cpr = spend / convos; }
-    else if (thruPlays > 0)   { resultVal = thruPlays;   resultType = 'ThruPlays';   cpr = spend / thruPlays; }
-    else if (engagements > 0) { resultVal = engagements; resultType = 'Engagements'; cpr = spend / engagements; }
+    let resultVal=0, resultType='', cpr=null;
+    if      (leads>0)       { resultVal=leads;       resultType='Leads';       cpr=null; }
+    else if (purchases>0)   { resultVal=purchases;   resultType='Purchases';   cpr=null; }
+    else if (convos>0)      { resultVal=convos;      resultType='Convos';      cpr=null; }
+    else if (thruPlays>0)   { resultVal=thruPlays;   resultType='ThruPlays';   cpr=null; }
+    else if (engagements>0) { resultVal=engagements; resultType='Engagements'; cpr=null; }
 
-    totalSpend       += spend;
-    totalImpressions += impressions;
-    totalReach       += reach;
-    totalClicks      += clicks;
-    totalLeads       += leads;
-    totalPurchases   += purchases;
-    totalConvos      += convos;
-    totalThruPlays   += thruPlays;
-    totalEngagements += engagements;
-    totalLPV         += lpv;
+    totalImpressions += impressions; totalReach     += reach;
+    totalClicks      += clicks;      totalLeads      += leads;
+    totalPurchases   += purchases;   totalConvos     += convos;
+    totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    return {
-      name: c.campaign_name || c.campaign_id,
-      objective: c.objective || '',
-      spend, impressions, reach, clicks, freq, ctr, lpv,
-      thruPlays, leads, purchases, convos, engagements,
-      resultVal, resultType, cpr,
-      spendFmt: fmtC(spend),
-      cprFmt: cpr ? fmtC(cpr) : '—',
-    };
+    return { name:c.campaign_name||c.campaign_id, objective:c.objective||'', impressions, reach, clicks, freq, ctr, thruPlays, leads, purchases, convos, engagements, resultVal, resultType };
   });
 
-  // Account-level primary result
-  let acctType = 'Results', acctTotal = 0;
-  if (totalLeads > 0)          { acctType = 'Leads';       acctTotal = totalLeads; }
-  else if (totalPurchases > 0) { acctType = 'Purchases';   acctTotal = totalPurchases; }
-  else if (totalConvos > 0)    { acctType = 'Convos';      acctTotal = totalConvos; }
-  else if (totalThruPlays > 0) { acctType = 'ThruPlays';   acctTotal = totalThruPlays; }
-  else if (totalEngagements > 0){ acctType = 'Engagements'; acctTotal = totalEngagements; }
-
-  const withCPR = camps.filter(c => c.cpr > 0);
-  const bestCPR = withCPR.length ? Math.min(...withCPR.map(c => c.cpr)) : null;
+  let acctType='Results', acctTotal=0;
+  if      (totalLeads>0)       { acctType='Leads';       acctTotal=totalLeads; }
+  else if (totalPurchases>0)   { acctType='Purchases';   acctTotal=totalPurchases; }
+  else if (totalConvos>0)      { acctType='Conversations'; acctTotal=totalConvos; }
+  else if (totalThruPlays>0)   { acctType='ThruPlays';   acctTotal=totalThruPlays; }
+  else if (totalEngagements>0) { acctType='Engagements'; acctTotal=totalEngagements; }
 
   return {
-    camps,
-    totalSpend, totalImpressions, totalReach, totalClicks,
-    totalLeads, totalPurchases, totalConvos, totalThruPlays, totalEngagements, totalLPV,
-    acctType, acctTotal,
-    bestCPR,
-    totalSpendFmt: fmtC(totalSpend),
-    bestCPRFmt: bestCPR ? fmtC(bestCPR) : '—',
-    avgFreq: camps.length ? (camps.reduce((s,c) => s + c.freq, 0) / camps.length).toFixed(2) : '—',
-    avgCTR: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) + '%' : '—',
+    camps, acctType, acctTotal,
+    totalImpressions, totalReach, totalClicks,
+    totalLeads, totalPurchases, totalConvos, totalThruPlays, totalEngagements,
+    avgFreq: camps.length ? (camps.reduce((s,c)=>s+c.freq,0)/camps.length).toFixed(2) : '—',
+    avgCTR:  totalImpressions>0 ? ((totalClicks/totalImpressions)*100).toFixed(2)+'%' : '—',
   };
 }
 
-// ── SMART INSIGHTS ─────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// SMART INSIGHTS
+// ══════════════════════════════════════════
 function generateInsights(d) {
+  const insights=[], recs=[];
   const camps = d.camps;
-  const insights = [];
-  const recs = [];
 
-  // Best performer
-  const withCPR = camps.filter(c => c.cpr > 0 && c.spend > 0);
-  if (withCPR.length) {
-    const best = withCPR.reduce((a, b) => a.cpr < b.cpr ? a : b);
-    insights.push({ type: 'good', icon: '🏆', title: 'Best Performing Campaign',
-      body: `<strong>${best.name}</strong> delivered the best results — ${fmtN(best.resultVal)} ${best.resultType.toLowerCase()} at ${best.cprFmt} each. CTR ${(best.ctr * 100).toFixed(2)}%, frequency ${best.freq.toFixed(2)}×.` });
+  // Best performer by result volume
+  const withResults = camps.filter(c=>c.resultVal>0);
+  if (withResults.length) {
+    const best = withResults.reduce((a,b)=>a.resultVal>b.resultVal?a:b);
+    insights.push({type:'good',icon:'🏆',title:'Top Performing Campaign',
+      body:`<strong>${best.name}</strong> led this period with <strong>${fmtN(best.resultVal)} ${best.resultType.toLowerCase()}</strong>. CTR ${(best.ctr*100).toFixed(2)}%, frequency ${best.freq.toFixed(2)}× — healthy signals across the board.`});
   }
 
-  // ThruPlays pool
-  if (d.totalThruPlays > 1000) {
-    insights.push({ type: 'good', icon: '🎯', title: 'Warm Video Audience Built',
-      body: `<strong>${fmtN(d.totalThruPlays)} people watched your videos in full.</strong> This is a high-intent audience already familiar with Veriseek — prime candidates for retargeting with a lead generation or waitlist campaign.` });
-    recs.push({ priority: 'GROWTH', title: 'Retarget ThruPlay Viewers with a Lead Campaign',
-      body: `Create a Custom Audience of people who watched 75–100% of your videos (${fmtN(d.totalThruPlays)} people) and run a native Lead Form campaign. This warm audience will convert at significantly lower CPL than cold traffic.` });
+  // ThruPlays warm audience
+  if (d.totalThruPlays>1000) {
+    insights.push({type:'good',icon:'🎯',title:'Warm Video Audience Built',
+      body:`<strong>${fmtN(d.totalThruPlays)} people watched Veriseek videos in full.</strong> These are high-intent viewers who stayed until the end — the ideal audience for a retargeting lead generation or waitlist campaign in the next phase.`});
+    recs.push({priority:'GROWTH',title:'Retarget ThruPlay Viewers with a Lead Form Campaign',
+      body:`Create a Custom Audience of people who watched 75–100% of your videos (${fmtN(d.totalThruPlays)} people) and launch a Meta Lead Form campaign. This warm pool consistently converts at 30–50% lower CPL than cold traffic.`});
   }
 
-  // High frequency warning
-  const highFreq = camps.filter(c => c.freq > 2.5 && c.spend > 0);
+  // High frequency
+  const highFreq = camps.filter(c=>c.freq>2.5&&(c.resultVal>0||c.impressions>0));
   if (highFreq.length) {
-    const worst = highFreq.sort((a, b) => b.freq - a.freq)[0];
-    insights.push({ type: 'warn', icon: '🔻', title: 'Audience Fatigue Detected',
-      body: `<strong>${worst.name}</strong> reached frequency <strong>${worst.freq.toFixed(2)}×</strong> — your audience has seen this ad repeatedly. Creative refresh or audience expansion is needed to prevent further CPR deterioration.` });
-    recs.push({ priority: 'URGENT', title: 'Refresh Creative on High-Frequency Campaigns',
-      body: `${highFreq.map(c => c.name).join(', ')} — duplicate the ad set with new creative and pause the original. Reducing frequency below 2.0× typically restores engagement rates without any budget change.` });
-  }
-
-  // Landing page drop-off
-  if (d.totalClicks > 0 && d.totalLPV > 0) {
-    const dropOff = ((d.totalClicks - d.totalLPV) / d.totalClicks * 100).toFixed(0);
-    if (parseInt(dropOff) > 30) {
-      insights.push({ type: 'alert', icon: '⚙️', title: `${dropOff}% Click-to-LPV Drop-off`,
-        body: `${fmtN(d.totalClicks)} clicks but only ${fmtN(d.totalLPV)} people reached the landing page — a ${dropOff}% drop-off. This is a technical issue (slow page load, broken redirect, or mobile rendering problem) costing conversions every day.` });
-      recs.push({ priority: 'HIGH', title: 'Fix Landing Page Drop-off — Low Effort, High Impact',
-        body: `Audit the destination URL for mobile page speed (use Google PageSpeed Insights), redirect chains, and form rendering. A ${dropOff}% drop-off means roughly ${dropOff}% of your ad budget is being wasted at the last step before conversion.` });
-    }
+    const worst = highFreq.sort((a,b)=>b.freq-a.freq)[0];
+    insights.push({type:'warn',icon:'⚠️',title:'Audience Fatigue — Frequency Too High',
+      body:`<strong>${worst.name}</strong> hit frequency <strong>${worst.freq.toFixed(2)}×</strong>. Your audience is seeing this ad repeatedly and engagement is likely declining. A creative refresh or broader audience will restore performance without changing budget.`});
+    recs.push({priority:'URGENT',title:'Refresh Creative on High-Frequency Campaigns',
+      body:`Duplicate the ad set for ${highFreq.map(c=>c.name).join(', ')} with new visuals and copy. Pause the original. Target frequency below 2.0× to maximise engagement and prevent CPR from rising further.`});
   }
 
   // Reach milestone
-  if (d.totalReach > 10000) {
-    insights.push({ type: 'info', icon: '📢', title: `${fmtN(d.totalReach)} Unique People Reached`,
-      body: `Veriseek's brand is now visible to <strong>${fmtN(d.totalReach)} unique people</strong> this period — at an average frequency of ${d.avgFreq}×. This brand awareness pool is the foundation for all future conversion campaigns.` });
+  if (d.totalReach>10000) {
+    insights.push({type:'info',icon:'📢',title:`${fmtN(d.totalReach)} Unique People Reached`,
+      body:`Veriseek's brand is now visible to <strong>${fmtN(d.totalReach)} unique people</strong> this period at avg frequency ${d.avgFreq}×. This growing brand-aware pool is the foundation for all future conversion campaigns.`});
   }
 
-  // No leads yet
-  if (d.totalLeads === 0 && d.totalPurchases === 0 && d.totalConvos === 0) {
-    insights.push({ type: 'info', icon: '🌱', title: 'Brand Awareness Phase — No Conversions Yet',
-      body: `Current campaigns are building reach and brand recall — no direct conversion objective is running. This is the right foundation before launching lead generation. The ${fmtN(d.totalThruPlays)} ThruPlays indicate the audience is warming up.` });
-    recs.push({ priority: 'HIGH', title: 'Launch a Lead Generation Campaign Now',
-      body: `The brand awareness groundwork is in place. Launch a Meta Lead Form campaign targeting the ${fmtN(d.totalThruPlays)} video viewers and ${fmtN(d.totalEngagements)} engagers built this period. Native lead forms remove the landing page dependency entirely.` });
+  // No conversions yet — pure awareness phase
+  if (d.totalLeads===0&&d.totalPurchases===0&&d.totalConvos===0) {
+    insights.push({type:'info',icon:'🌱',title:'Awareness Phase — Foundation Being Built',
+      body:`Current campaigns are focused on reach and brand recall — no conversion objective is running yet. With ${fmtN(d.totalThruPlays)} ThruPlays and ${fmtN(d.totalEngagements)} engagements, the audience is warming up and ready for the next phase.`});
+    recs.push({priority:'HIGH',title:'Launch a Lead Generation Campaign',
+      body:`The brand awareness groundwork is in place. Launch a Meta Lead Form campaign targeting your ${fmtN(d.totalThruPlays)} video viewers and ${fmtN(d.totalEngagements)} engagers. Native lead forms remove the landing page dependency entirely, reducing friction for sign-ups.`});
   }
 
-  // Budget efficiency
-  if (d.totalSpend > 0 && withCPR.length >= 2) {
-    const worst2 = withCPR.sort((a, b) => b.cpr - a.cpr)[0];
-    if (worst2.cpr > (d.bestCPR * 3)) {
-      recs.push({ priority: 'HIGH', title: `Pause "${worst2.name}" — CPR ${worst2.cprFmt} vs Best ${d.bestCPRFmt}`,
-        body: `This campaign's cost per result is ${(worst2.cpr / d.bestCPR).toFixed(1)}× higher than your best. Reallocating its budget to the top-performing campaign would deliver significantly more results for the same spend.` });
-    }
-  }
+  // Advantage+ recommendation
+  recs.push({priority:'MEDIUM',title:'Enable Advantage+ Audience on Active Campaigns',
+    body:`Switching ad sets to Advantage+ Audience allows Meta to automatically find best-converting segments beyond manual targeting. Meta reports an average 9–10% lower CPR for accounts using this feature — minimal setup, measurable impact.`});
 
-  // Generic always-on rec
-  recs.push({ priority: 'MEDIUM', title: 'Test Advantage+ Audience on Active Campaigns',
-    body: `Switching ad sets to Advantage+ Audience allows Meta to automatically find the best-converting audience segments. Meta reports an average 9–10% lower cost per result for accounts using this feature — minimal setup, measurable impact.` });
-
-  return { insights: insights.slice(0, 6), recs: recs.slice(0, 4) };
+  return { insights: insights.slice(0,6), recs: recs.slice(0,4) };
 }
 
-// ── GENERATE REPORT ────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// GENERATE REPORT
+// ══════════════════════════════════════════
 async function generateReport() {
-  const preset = PRESETS[selectedPreset];
-  const since = preset.since();
-  const until = preset.until();
-  const genBtn = document.getElementById('genBtn');
+  if (selectedPreset==='custom' && (!customSince||!customUntil)) {
+    alert('Please select both start and end dates, then click Apply.');
+    return;
+  }
+
+  const preset  = PRESETS[selectedPreset];
+  const since   = preset.since();
+  const until   = preset.until();
+  const genBtn  = document.getElementById('genBtn');
   const content = document.getElementById('content');
-  const statusPill = document.getElementById('statusPill');
+  const pill    = document.getElementById('statusPill');
 
-  genBtn.classList.add('loading');
-  genBtn.disabled = true;
-  document.getElementById('genTxt').textContent = 'Generating…';
-  statusPill.textContent = '⏳ Fetching data…';
+  genBtn.classList.add('loading'); genBtn.disabled=true;
+  document.getElementById('genTxt').textContent='Generating…';
+  pill.textContent='⏳ Fetching…';
+  pill.style.cssText='';
 
-  content.innerHTML = `
+  content.innerHTML=`
     <div class="loading-wrap">
-      <div class="loading-title">Pulling live Meta data…</div>
+      <div class="loading-logo"><span class="m">meraki</span><span class="a">ads</span></div>
+      <div class="loading-sub">Pulling live data for <b>${CLIENT_NAME}</b>…</div>
       <div class="loading-steps">
         <div class="lstep active" id="ls1"><div class="lstep-ico">1</div>Fetching campaigns…</div>
         <div class="lstep" id="ls2"><div class="lstep-ico">2</div>Loading insights…</div>
@@ -447,51 +536,39 @@ async function generateReport() {
     </div>`;
 
   try {
-    // Step 1: campaigns
-    const campsData = await metaAPI(`act_${ACCOUNT_ID}/campaigns`, {
-      fields: 'id,name,objective,effective_status',
-      limit: 50,
-    });
+    // Step 1
+    await metaAPI(`act_${ACCOUNT_ID}/campaigns`,{fields:'id,name,objective,effective_status',limit:50});
     stepDone('ls1'); stepActive('ls2');
 
-    // Step 2: insights
-    const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`, {
-      fields: [
-        'campaign_id', 'campaign_name', 'objective',
-        'spend', 'impressions', 'reach', 'clicks', 'ctr', 'frequency', 'cpm', 'cpc',
-        'actions', 'cost_per_action_type',
-        'video_thruplay_watched_actions',
-      ].join(','),
-      level: 'campaign',
-      time_range: JSON.stringify({ since, until }),
-      sort: 'spend_descending',
-      limit: 50,
+    // Step 2
+    const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
+      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions'].join(','),
+      level:'campaign',
+      time_range:JSON.stringify({since,until}),
+      sort:'impressions_descending',
+      limit:50,
     });
     stepDone('ls2'); stepActive('ls3');
 
-    const raw = insightsData.data || [];
-    if (raw.length === 0) {
-      throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
-    }
+    const raw = insightsData.data||[];
+    if (!raw.length) throw new Error(`No campaign data found for ${preset.label}. The account may have no active campaigns in this period.`);
 
-    // Step 3: process
-    const d = processInsights(raw);
+    const d     = processInsights(raw);
     const smart = generateInsights(d);
     stepDone('ls3'); stepActive('ls4');
-    await sleep(200);
+    await sleep(250);
 
-    // Step 4: build report
-    const fromFmt = new Date(since).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const toFmt   = new Date(until).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const genDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const html = buildReportHTML(d, smart, preset.label, fromFmt, toFmt, genDate);
+    const fromFmt = fmtDate(since);
+    const toFmt   = fmtDate(until);
+    const genDate = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+    const html    = buildReportHTML(d, smart, preset.label, fromFmt, toFmt, genDate);
 
     stepDone('ls4');
     await sleep(200);
 
     window._reportHTML = html;
 
-    content.innerHTML = `
+    content.innerHTML=`
       <div class="report-actions">
         <div class="ra-info"><b>Veriseek AI</b> · ${preset.label} · ${fromFmt} → ${toFmt}</div>
         <div class="ra-btns">
@@ -499,50 +576,57 @@ async function generateReport() {
           <button class="ra-btn primary" onclick="downloadReport()">⬇ Download</button>
         </div>
       </div>
-      <div class="report-wrap" id="reportWrap">${html}</div>`;
+      <div class="report-wrap">${html}</div>`;
 
-    statusPill.textContent = '✓ Report ready';
-    statusPill.style.background = '#DCFCE7';
-    statusPill.style.color = '#15803D';
-    statusPill.style.borderColor = '#BBF7D0';
+    pill.textContent='✓ Report ready';
+    pill.style.background='var(--green-lt)';
+    pill.style.color='var(--green-dk)';
+    pill.style.borderColor='var(--green-bd)';
 
-  } catch (err) {
-    content.innerHTML = `
+  } catch(err) {
+    content.innerHTML=`
       <div class="err-box">
         <h4>Failed to generate report</h4>
         <p><code>${err.message}</code></p>
-        <p style="margin-top:8px">Check that the <code>META_ACCESS_TOKEN</code> environment variable is set in Vercel and the token has <code>ads_read</code> + <code>ads_management</code> permissions.</p>
+        <p style="margin-top:8px">Check that <code>META_ACCESS_TOKEN</code> is set in Vercel environment variables and has <code>ads_read</code> + <code>ads_management</code> permissions.</p>
       </div>`;
-    statusPill.textContent = '✕ Error';
-    statusPill.style.background = '#FEE2E2';
-    statusPill.style.color = '#B91C1C';
-    statusPill.style.borderColor = '#FECACA';
+    pill.textContent='✕ Error';
+    pill.style.background='var(--red-lt)';
+    pill.style.color='var(--red)';
+    pill.style.borderColor='var(--red-bd)';
     console.error(err);
   }
 
-  genBtn.classList.remove('loading');
-  genBtn.disabled = false;
-  document.getElementById('genTxt').textContent = 'Generate Report';
+  genBtn.classList.remove('loading'); genBtn.disabled=false;
+  document.getElementById('genTxt').textContent='Generate Report';
 }
 
-// ── BUILD REPORT HTML ──────────────────────────────────────────────
+// ══════════════════════════════════════════
+// BUILD REPORT HTML
+// ══════════════════════════════════════════
 function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
-  const objBadge = { OUTCOME_LEADS: ['bp', 'Leads'], OUTCOME_SALES: ['bt', 'Sales'],
-    OUTCOME_AWARENESS: ['bp', 'Awareness'], OUTCOME_ENGAGEMENT: ['ba', 'Engagement'],
-    OUTCOME_TRAFFIC: ['bt', 'Traffic'], LINK_CLICKS: ['bt', 'Traffic'] };
-  const priTag = { URGENT: 'tag-urgent', HIGH: 'tag-high', MEDIUM: 'tag-medium', GROWTH: 'tag-growth' };
+  const objBadge = {
+    OUTCOME_LEADS:'bp', OUTCOME_SALES:'bt', OUTCOME_AWARENESS:'bp',
+    OUTCOME_ENGAGEMENT:'ba', OUTCOME_TRAFFIC:'bt', LINK_CLICKS:'bt'
+  };
+  const objLabel = {
+    OUTCOME_LEADS:'Leads', OUTCOME_SALES:'Sales', OUTCOME_AWARENESS:'Awareness',
+    OUTCOME_ENGAGEMENT:'Engagement', OUTCOME_TRAFFIC:'Traffic', LINK_CLICKS:'Traffic'
+  };
+  const priTag = { URGENT:'tag-urgent', HIGH:'tag-high', MEDIUM:'tag-medium', GROWTH:'tag-growth' };
 
-  // Funnel rows
-  const maxF = d.totalReach || 1;
+  // Funnel
+  const maxF = d.totalReach||1;
   const funnelRows = [
-    { label: 'Total Reach',         val: d.totalReach,       color: '#EEEDFE', fg: '#26215C', min: 120 },
-    d.totalThruPlays > 0 ? { label: 'Video ThruPlays', val: d.totalThruPlays, color: '#AFA9EC', fg: '#26215C', min: 80 } : null,
-    d.totalEngagements > 0 ? { label: 'Post Engagements', val: d.totalEngagements, color: '#5DCAA5', fg: '#04342C', min: 60 } : null,
-    d.totalClicks > 0 ? { label: 'Link Clicks', val: d.totalClicks, color: '#EF9F27', fg: '#412402', min: 44 } : null,
-    d.totalLPV > 0 ? { label: 'Landing Page Views', val: d.totalLPV, color: '#D97706', fg: '#fff', min: 36 } : null,
-    d.acctTotal > 0 && !['ThruPlays','Engagements'].includes(d.acctType)
-      ? { label: d.acctType, val: d.acctTotal, color: '#E24B4A', fg: '#501313', min: 30 } : null,
+    {label:'Total Reach',       val:d.totalReach,       color:'#EEEDFE',fg:'#26215C',min:120},
+    d.totalThruPlays>0   ?{label:'Video ThruPlays',  val:d.totalThruPlays,   color:'#AFA9EC',fg:'#26215C',min:80}:null,
+    d.totalEngagements>0 ?{label:'Post Engagements', val:d.totalEngagements, color:'#5DCAA5',fg:'#04342C',min:60}:null,
+    d.totalClicks>0      ?{label:'Link Clicks',      val:d.totalClicks,      color:'#EF9F27',fg:'#412402',min:44}:null,
+    d.acctTotal>0&&!['ThruPlays','Engagements'].includes(d.acctType)
+      ?{label:d.acctType, val:d.acctTotal, color:'#E24B4A',fg:'#501313',min:30}:null,
   ].filter(Boolean);
+
+  let secN=0; const ns=()=>++secN;
 
   return `
 <style>
@@ -557,8 +641,8 @@ function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
 .sh{display:flex;align-items:center;gap:10px;margin-bottom:18px}
 .sn{font-family:'DM Serif Display',serif;font-size:13px;color:#C9A84C;border:1px solid #C9A84C;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
 .st{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B6560}
-.div{border:none;border-top:1px solid #E2DDD5;margin:36px 0}
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.divr{border:none;border-top:1px solid #E2DDD5;margin:36px 0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .sc{background:#fff;border:1px solid #E2DDD5;border-radius:12px;padding:18px}
 .sc.hl{background:#1A1714;border-color:#1A1714}
 .sc.hl .sl{color:#9E9890}.sc.hl .sv{color:#fff}.sc.hl .ss{color:#6B6560}
@@ -570,7 +654,7 @@ function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
 .ct td{padding:12px 10px;border-bottom:1px solid #E2DDD5;font-size:12.5px;vertical-align:top}
 .ct tr:last-child td{border-bottom:none}
 .ct tr:hover td{background:#F0EDE6}
-.cn{font-weight:500;color:#1A1714;margin-bottom:2px;font-size:12.5px}
+.cn{font-weight:500;color:#1A1714;font-size:12.5px;margin-bottom:2px}
 .badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 .bp{background:#EAE8F7;color:#4C3FA0}.bt{background:#E0F5F1;color:#0F7B6C}.ba{background:#FEF3C7;color:#B45309}
 .num{font-weight:500;color:#1A1714}.nsub{font-size:10.5px;color:#9E9890;margin-top:2px}
@@ -605,6 +689,8 @@ function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
 .tag-medium{background:#EAE8F7;color:#4C3FA0}.tag-growth{background:#DCFCE7;color:#15803D}
 .foot{border-top:1.5px solid #1A1714;padding-top:18px;margin-top:44px;display:flex;justify-content:space-between;align-items:center}
 .fn{font-size:11px;color:#9E9890}
+.mlogo{font-family:'Dancing Script',cursive;font-size:15px;font-weight:700}
+.mlogo .mg{color:#7DC242}.mlogo .ma{color:#29ABE2}
 @media print{.rpt{padding:28px}}
 </style>
 <div class="rpt">
@@ -612,7 +698,7 @@ function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
 <div class="rh">
   <div>
     <div class="rt">Veriseek <span>AI</span><br>${periodLabel}</div>
-    <p style="font-size:12.5px;color:#6B6560;margin-top:6px">Meta Ads · Facebook &amp; Instagram · INR</p>
+    <p style="font-size:12.5px;color:#6B6560;margin-top:6px">Meta Ads · Facebook &amp; Instagram</p>
   </div>
   <div class="rm">
     <p><strong>Period</strong> ${fromFmt} – ${toFmt}</p>
@@ -622,92 +708,99 @@ function buildReportHTML(d, smart, periodLabel, fromFmt, toFmt, genDate) {
   </div>
 </div>
 
+<!-- 1. SUMMARY (no spend) -->
 <div class="sec">
-<div class="sh"><div class="sn">1</div><div class="st">Account Summary</div></div>
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Account Summary — ${periodLabel}</div></div>
 <div class="sg">
-  <div class="sc hl"><div class="sl">Total Spend</div><div class="sv">${d.totalSpendFmt}</div><div class="ss">${periodLabel}</div></div>
-  <div class="sc"><div class="sl">Total Reach</div><div class="sv">${fmtN(d.totalReach)}</div><div class="ss">Unique people · Freq ${d.avgFreq}×</div></div>
+  <div class="sc hl"><div class="sl">Total Reach</div><div class="sv">${fmtN(d.totalReach)}</div><div class="ss">Unique people · Freq ${d.avgFreq}×</div></div>
   <div class="sc"><div class="sl">Impressions</div><div class="sv">${fmtN(d.totalImpressions)}</div><div class="ss">Avg CTR ${d.avgCTR}</div></div>
-  <div class="sc"><div class="sl">${d.acctType || 'Results'}</div><div class="sv">${fmtN(d.acctTotal) || '—'}</div><div class="ss">Best ${d.bestCPRFmt} per result</div></div>
+  <div class="sc"><div class="sl">${d.acctType||'Results'}</div><div class="sv">${fmtN(d.acctTotal)||'—'}</div><div class="ss">${d.camps.length} campaign${d.camps.length!==1?'s':''} active</div></div>
 </div>
-</div><hr class="div"/>
+</div><hr class="divr"/>
 
+<!-- 2. CAMPAIGN BREAKDOWN (no spend column) -->
 <div class="sec">
-<div class="sh"><div class="sn">2</div><div class="st">Campaign Breakdown</div></div>
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Campaign Breakdown</div></div>
 <table class="ct">
-<thead><tr><th>Campaign</th><th>Type</th><th>Reach / Impressions</th><th>Primary Result</th><th>Spend · Freq</th></tr></thead>
+<thead><tr><th>Campaign</th><th>Type</th><th>Reach</th><th>Impressions · Freq</th><th>Primary Result</th><th>CTR</th></tr></thead>
 <tbody>
-${d.camps.map(c => {
-  const [bc, bl] = objBadge[c.objective] || ['bp', c.objective || '—'];
+${d.camps.map(c=>{
+  const bc = objBadge[c.objective]||'bp';
+  const bl = objLabel[c.objective]||c.objective||'—';
   return `<tr>
-    <td><div class="cn"><span class="sdot ${c.spend > 0 ? 'da' : 'do'}"></span>${c.name}</div></td>
+    <td><div class="cn"><span class="sdot ${c.impressions>0?'da':'do'}"></span>${c.name}</div></td>
     <td><span class="badge ${bc}">${bl}</span></td>
-    <td><div class="num">${fmtN(c.reach)} reach</div><div class="nsub">${fmtN(c.impressions)} impr · ${c.freq.toFixed(2)}× freq</div></td>
-    <td><div class="num">${c.resultVal ? fmtN(c.resultVal) + ' ' + c.resultType : '—'}</div><div class="nsub">${c.cpr ? 'Cost: ' + c.cprFmt : ''}</div></td>
-    <td><div class="num">${c.spendFmt}</div><div class="nsub">Freq ${c.freq.toFixed(2)}×</div></td>
+    <td><div class="num">${fmtN(c.reach)}</div></td>
+    <td><div class="num">${fmtN(c.impressions)}</div><div class="nsub">${c.freq.toFixed(2)}× freq</div></td>
+    <td><div class="num">${c.resultVal?fmtN(c.resultVal)+' '+c.resultType:'—'}</div></td>
+    <td><div class="num">${(c.ctr*100).toFixed(2)}%</div></td>
   </tr>`;
 }).join('')}
 </tbody></table>
-</div><hr class="div"/>
+</div><hr class="divr"/>
 
-${d.totalReach > 0 ? `
+<!-- 3. FUNNEL -->
+${d.totalReach>0?`
 <div class="sec">
-<div class="sh"><div class="sn">3</div><div class="st">Full Funnel — Reach to Results</div></div>
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Full Funnel — Reach to Results</div></div>
 <div class="fb">
-${funnelRows.map((f, i) => `
-${i > 0 ? `<div class="fa">↓</div>` : ''}
+${funnelRows.map((f,i)=>`
+${i>0?'<div class="fa">↓</div>':''}
 <div class="fr">
   <div class="fs">${f.label}</div>
-  <div class="fw"><div class="fb2" style="width:${Math.max(f.min / 8, Math.min(100, f.val / maxF * 100)).toFixed(1)}%;background:${f.color};color:${f.fg};min-width:${f.min}px">${fmtN(f.val)}</div></div>
-  <div class="fright"><div class="fv">${fmtN(f.val)}</div><div class="fp">${(f.val / maxF * 100).toFixed(f.val > 1000 ? 1 : 3)}% of reach</div></div>
+  <div class="fw"><div class="fb2" style="width:${Math.max(f.min/8,Math.min(100,f.val/maxF*100)).toFixed(1)}%;background:${f.color};color:${f.fg};min-width:${f.min}px">${fmtN(f.val)}</div></div>
+  <div class="fright"><div class="fv">${fmtN(f.val)}</div><div class="fp">${(f.val/maxF*100).toFixed(f.val>1000?1:3)}% of reach</div></div>
 </div>`).join('')}
 </div>
-</div><hr class="div"/>` : ''}
+</div><hr class="divr"/>`:''}
 
-${smart.insights.length ? `
+<!-- 4. INSIGHTS -->
+${smart.insights.length?`
 <div class="sec">
-<div class="sh"><div class="sn">${d.totalReach > 0 ? 4 : 3}</div><div class="st">Key Insights</div></div>
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Key Insights</div></div>
 <div class="ig">
-${smart.insights.map(i => `
+${smart.insights.map(i=>`
 <div class="ic ${i.type}">
   <div class="ii">${i.icon}</div>
   <div class="iti">${i.title}</div>
   <div class="ib2">${i.body}</div>
 </div>`).join('')}
 </div>
-</div><hr class="div"/>` : ''}
+</div><hr class="divr"/>`:''}
 
-${smart.recs.length ? `
+<!-- 5. RECOMMENDATIONS -->
+${smart.recs.length?`
 <div class="sec">
-<div class="sh"><div class="sn">${d.totalReach > 0 ? 5 : 4}</div><div class="st">Our Recommendations</div></div>
+<div class="sh"><div class="sn">${ns()}</div><div class="st">Our Recommendations</div></div>
 <ul class="rl">
-${smart.recs.map((r, i) => `
+${smart.recs.map((r,i)=>`
 <li class="ri">
-  <div class="rn">${i + 1}</div>
+  <div class="rn">${i+1}</div>
   <div>
     <div class="rtit">${r.title}</div>
     <div class="rb">${r.body}</div>
-    <span class="rtag ${priTag[r.priority] || 'tag-medium'}">${r.priority}</span>
+    <span class="rtag ${priTag[r.priority]||'tag-medium'}">${r.priority}</span>
   </div>
 </li>`).join('')}
 </ul>
-</div>` : ''}
+</div>`:''}
 
 <div class="foot">
   <div class="fn">Veriseek AI · Meta Ads · ${fromFmt} – ${toFmt}</div>
-  <div class="fn" style="font-weight:600">Prepared by Meraki Ads</div>
+  <div class="mlogo">Prepared by <span class="mg">meraki</span><span class="ma">ads</span></div>
 </div>
-
 </div>`;
 }
 
-// ── DOWNLOAD & PRINT ───────────────────────────────────────────────
+// ══════════════════════════════════════════
+// DOWNLOAD & PRINT
+// ══════════════════════════════════════════
 function downloadReport() {
   if (!window._reportHTML) return;
   const full = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 <title>Veriseek AI — Meta Ads Report</title></head><body>${window._reportHTML}</body></html>`;
-  const blob = new Blob([full], { type: 'text/html' });
+  const blob = new Blob([full],{type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `Veriseek_Meta_Report_${selectedPreset}.html`;
@@ -715,12 +808,12 @@ function downloadReport() {
 }
 
 function printReport() {
-  const w = window.open('', '_blank');
+  const w = window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<title>Veriseek AI — Meta Ads Report</title></head><body>${window._reportHTML}</body></html>`);
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<title>Veriseek AI</title></head><body>${window._reportHTML}</body></html>`);
   w.document.close();
-  setTimeout(() => w.print(), 800);
+  setTimeout(()=>w.print(),800);
 }
 </script>
 </body>
