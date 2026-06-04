@@ -429,9 +429,10 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    // all_conversion_types comes from the Insights API response
+    // all_conversion_types lives inside results.all_conversion_types
     // e.g. "34 (Website landing page views)", "5 (Subscribe)"
-    const allTypes = Array.isArray(c.all_conversion_types) ? c.all_conversion_types : [];
+    const allTypes = (c.results && Array.isArray(c.results.all_conversion_types))
+                     ? c.results.all_conversion_types : [];
 
     function extractFromAllTypes(keyword) {
       for (const s of allTypes) {
@@ -588,7 +589,7 @@ async function generateReport() {
 
     // Step 2
     const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
-      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions','all_conversion_types'].join(','),
+      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions','results'].join(','),
       level:'campaign',
       time_range:JSON.stringify({since,until}),
       sort:'impressions_descending',
