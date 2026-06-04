@@ -285,7 +285,7 @@ function processInsights(raw) {
     const clicks      = parseInt(c.clicks || 0);
     const freq        = parseFloat(c.frequency || 0);
     const ctr         = parseFloat(c.ctr || 0);
-    const lpv         = parseInt(c.landing_page_views || 0);
+    const lpv         = 0; // landing_page_views not available for this account type
     const thruPlays   = c.video_thruplay_watched_actions
                           ? parseInt(c.video_thruplay_watched_actions[0]?.value || 0) : 0;
 
@@ -461,7 +461,6 @@ async function generateReport() {
         'spend', 'impressions', 'reach', 'clicks', 'ctr', 'frequency', 'cpm', 'cpc',
         'actions', 'cost_per_action_type',
         'video_thruplay_watched_actions',
-        'landing_page_views',
       ].join(','),
       level: 'campaign',
       time_range: JSON.stringify({ since, until }),
