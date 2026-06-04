@@ -429,12 +429,13 @@ function processInsights(raw) {
     totalPurchases   += purchases;   totalConvos     += convos;
     totalThruPlays   += thruPlays;   totalEngagements+= engagements;
 
-    // LPV — extract from all_conversion_types string array
-    // Meta returns e.g. "34 (Website landing page views)" inside results.all_conversion_types
-    const allTypes = c.results?.all_conversion_types || [];
+    // LPV — Meta includes it inside results.all_conversion_types
+    // e.g. "34 (Website landing page views)" or "34 (Landing page views)"
+    const allTypes = (c.results && Array.isArray(c.results.all_conversion_types))
+                     ? c.results.all_conversion_types : [];
     let lpv = 0;
     for (const s of allTypes) {
-      if (s.toLowerCase().includes('landing page view')) {
+      if (typeof s === 'string' && s.toLowerCase().includes('landing page view')) {
         const m = s.match(/^([\d,]+)/);
         if (m) { lpv = parseInt(m[1].replace(/,/g,''))||0; break; }
       }
@@ -579,7 +580,7 @@ async function generateReport() {
 
     // Step 2
     const insightsData = await metaAPI(`act_${ACCOUNT_ID}/insights`,{
-      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions','result_values'].join(','),
+      fields:['campaign_id','campaign_name','objective','impressions','reach','clicks','ctr','frequency','cpm','actions','cost_per_action_type','video_thruplay_watched_actions'].join(','),
       level:'campaign',
       time_range:JSON.stringify({since,until}),
       sort:'impressions_descending',
