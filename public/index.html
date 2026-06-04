@@ -432,10 +432,10 @@ function processInsights(raw) {
     // LPV — confirmed action_type from API response
     const lpv = getAction(c.actions, ['landing_page_view']);
 
-    // Form submissions — Subscribe (once Event Setup Tool is saved) or lead events
+    // Form submissions — Lead event is active (11 tracked), Subscribe also present
     const formSubmissions = getAction(c.actions, [
-      'subscribe',
       'lead',
+      'subscribe',
       'offsite_conversion.fb_pixel_lead',
       'offsite_conversion.fb_pixel_complete_registration',
     ]);
@@ -448,7 +448,8 @@ function processInsights(raw) {
       lpv, formSubmissions,
       resultVal, resultType,
       isWaitlist: (c.campaign_name||'').toLowerCase().includes('waitlist') ||
-                  c.objective === 'LINK_CLICKS',
+                  c.objective === 'LINK_CLICKS' ||
+                  leads > 0 || lpv > 0,
     };
   });
 
@@ -825,8 +826,8 @@ ${!d.waitlist.pixelTracked ? `
 <div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start">
   <div style="font-size:18px;flex-shrink:0">⚙️</div>
   <div>
-    <div style="font-size:12px;font-weight:700;color:#B91C1C;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Form Submissions Not Being Tracked</div>
-    <div style="font-size:12.5px;color:#7F1D1D;line-height:1.6">Meta's pixel is not firing a <strong>Lead</strong> or <strong>CompleteRegistration</strong> event when someone submits the waitlist form. This means we cannot report how many people actually signed up. To fix: add <code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;font-size:11px">fbq('track', 'Lead')</code> to your form's success page or confirmation step.</div>
+    <div style="font-size:12px;font-weight:700;color:#B91C1C;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Form Submissions Not Showing in This Period</div>
+    <div style="font-size:12.5px;color:#7F1D1D;line-height:1.6">Lead and Subscribe events are set up on the pixel but no form submissions were recorded in this date range. Try selecting a wider date range — 11 Lead events have been recorded historically on this pixel.</div>
   </div>
 </div>` : ''}
 
